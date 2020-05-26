@@ -7,11 +7,11 @@ Created on Fri May 22 13:40:57 2020
 """
 # TWO BODY PROBLEM
 
-# %% imports
+# %% IMPORTS
 import numpy as np
 import matplotlib.pyplot as plt
 
-# %% define constants
+# %% GLOBAL CONSTANTS
 
 # contants
 G = 1 # gravitational constant
@@ -20,8 +20,11 @@ M2 = 1.2
 Y0 = np.array([np.array([.4,0.]),np.array([-.4,0.]),
                np.array([0.,-1.]),np.array([0.,1.])])# cartesian (p1,p2,q1,q2)
 
-H = 0.01 # timestep
-STEPS = 3000
+H = 0.1 # timestep
+STEPS = 30000
+ENERGY_0 = get_energy(Y0)
+TOTAL_MOMENUM_0 = get_total_linear_momentum_abs(Y0)
+TOTAL_ANG_MOMENTUM_0 = get_total_angular_momentum(Y0)
 
 # go into CM frame by setting net momentum to zero
 
@@ -41,7 +44,7 @@ once you figure out how to code the hamiltonian make this into
 idea for a display function, shows you all the relative radii (relative distances betwwen objects)
 """
 
-# %% 
+# %% GLOBAL VARIABLES
 
 energy_arr = []
 linear_momentum_arr = []
@@ -52,7 +55,7 @@ time_arr = []
 radius_arr = []
 
 
-### FUNCTIONS THAT CALCULATE THINGS
+# %% FUNCTIONS THAT CALCULATE THINGS
 
 # helper function, calculates absolute value squared of vector
 def normsq(v):
@@ -129,7 +132,21 @@ def display_trajectories():
     ax.plot(m1x,m1y)
     ax.plot(m2x,m2y)
     plt.title('Trajectories   :   h={} , steps={}'.format(H,STEPS),fontsize=17)
+    plt.show()
     
+def display_trajectories_relative():
+    global position_arr
+    position_arr = np.array(position_arr)
+    m1x = position_arr.T[0][0]
+    m2x = position_arr.T[0][1]
+    m1y = position_arr.T[1][0]
+    m2y = position_arr.T[1][1]
+    relative_position = [m1x-m2x , m1y-m2y]
+    
+    fig,ax = plt.subplots(figsize=(10,10))
+    ax.plot(relative_position[0],relative_position[1])
+    plt.title('Relative trajectories : h={} , steps={}'.format(H,STEPS),fontsize=17)
+    plt.show()
     
 def display_total_energy():
     # global energy_arr
@@ -188,7 +205,7 @@ def display_invarients():
     plt.tight_layout()
     
 
-# %%
+# %% NUMERICAL FLOW FUNCTIONS
     
 # advances solution forward one timestep using the explicit euler method
 def exp_euler_timestep(y):
@@ -215,35 +232,160 @@ def stromer_verlet_timestep(y):
     
     return y_next
 
-# advances solution one timestep using explicit trapezium rule (runge kutta)
+# advances solution one timestep using explicit trapezium rule (runge kutta) p28
 def exp_trapezium(y):
     k1 = gradient(y)
     k2 = gradient(y + H*k1)
     y_next = y + 0.5*H*(k1+k2)
     return y_next
 
+# advances solution one timestep using explicit midpoint rule (runge kutta) p28
+def exp_midpoint(y):
+    k1 = gradient(y)
+    k2 = gradient(y + H*k1*0.5)
+    y_next = y + H*k2
+    return y_next
+
+# with u=(p1,p2) and v=(q1,q2) we use syplectic euler method, easy because
+# u' = a(v) and v' = b(u) , single variable dependence
+def syplectic_euler(y):
+    grady = gradient(y)
+    u,v,u_prime = y[:2],y[2:],grady[:2]
+    # first advance u_n to u_n+1 by explicit euler
+    u_next = u + H*u_prime
+    # then advance v_n to v_n+1 by implicit euler
+    grady_2 = gradient(np.array([u_next[0],u_next[1],v[0],v[1]]))
+    v_next_prime = grady_2[2:]
+    v_next = v + H*v_next_prime
+    y_next = np.concatenate([u_next,v_next])
+    return y_next
+
+def fourth_order_kutta(y):
+    # equation 1.8 left p30
+    k1 = gradient(y)
+    k2 = gradient(y + 0.5*H*k1)
+    k3 = gradient(y + 0.5*H*k2)
+    k4 = gradient(y + H*k3)
+    y_next = y + H/6*(k1 + 2*k2 + 2*k3 + k4)
+    return y_next
+
+# %% PROJECTIONS
+
+# energy projection
+def energy_projection(y):
     
+    
+# General first integral projection
+
+    
+
+
+# %% DISPLAY
+    
+def display_compare_methods(data):
+    plt.subplots(2,2,figsize=(10,10))
+    
+    # display energy
+    plt.subplot(221)
+    for times,energies,name in zip(data['time'],data['energy'],data['name']):
+        plt.plot(times,energies,label=name,alpha=.6)
+    plt.title('Energy : h={} , steps={}'.format(H,STEPS),fontsize=16)
+    plt.ylabel('Energy')
+    plt.xlabel('Time')
+    plt.legend()
+    
+    # display trajectories
+    plt.subplot(222)
+    for times,positions,name in zip(data['time'],data['position'],data['name']):
+        m1x = positions.T[0][0]
+        m2x = positions.T[0][1]
+        m1y = positions.T[1][0]
+        m2y = positions.T[1][1]
+        relative_position = [m1x-m2x , m1y-m2y]
+        
+        plt.plot(relative_position[0],relative_position[1],label=name,alpha=.6)
+    plt.title('Relative trajectories : h={} , steps={}'.format(H,STEPS),fontsize=16)
+    plt.ylabel('Relative Y')
+    plt.xlabel('Relative X')
+    plt.legend()
+    
+    # display linear momentum
+    plt.subplot(223)
+    for times,momentums,name in zip(data['time'],data['lin_momentum'],data['name']):
+        plt.plot(times,momentums,label=name,alpha=.6)
+    plt.title('Linear Momenta : h={} , steps={}'.format(H,STEPS),fontsize=16)
+    plt.ylabel('Linear Momentum')
+    plt.xlabel('Time')
+    plt.legend()
+    
+    # display angular momentum
+    plt.subplot(224)
+    for times,ang_momentums,name in zip(data['time'],data['ang_momentum'],data['name']):
+        plt.plot(times,ang_momentums,label=name,alpha=.75)
+    plt.title('Angular Momenta : h={} , steps={}'.format(H,STEPS),fontsize=16)
+    plt.ylabel('Angular Momentum')
+    plt.xlabel('Time')
+    plt.legend()
+    
+    plt.tight_layout()
+    plt.show()
+    
+    
+def compare_methods(list_of_methods):
+    global time,energy_arr,linear_momentum_arr,ang_momentum_arr,position_arr,time_arr,radius_arr
+    data = {'name':[] , 'energy':[] , 'lin_momentum':[] , 'ang_momentum':[] ,
+            'position':[] , 'time':[] , 'radius':[]}
+    for method in list_of_methods:
+        y = Y0[:]
+        time=0
+        for i in range(STEPS):
+            y = method(y)
+            time+=H
+            update_dta(y)
+        
+        # save all the data in a big dictionary of arrays
+        data['name'].append(method.__name__)
+        data['energy'].append(np.array(energy_arr[:]))
+        data['lin_momentum'].append(np.array(linear_momentum_arr[:]))
+        data['ang_momentum'].append(np.array(ang_momentum_arr[:]))
+        data['position'].append(np.array(position_arr[:]))
+        data['time'].append(np.array(time_arr[:]))
+        data['radius'].append(np.array(radius_arr[:]))
+        
+        # reset the global vairables for a new run
+        energy_arr = []
+        linear_momentum_arr = []
+        ang_momentum_arr = []
+        position_arr = [] # [Y0[2:]]
+        time = 0
+        time_arr = []
+        radius_arr = []
+        
+    return data
+
+
+
 # %% main
 if __name__ == "__main__":
-    y = Y0[:]
-    for i in range(STEPS):
-        # y = exp_euler_timestep(y)
-        # y = stromer_verlet_timestep(y)
-        y = exp_trapezium(y)
-        
-        # update the time
-        time+=H
+    data = compare_methods([stromer_verlet_timestep,
+                            fourth_order_kutta])
+    display_compare_methods(data)
     
-        update_dta(y)
-    display_trajectories()
-    # display_total_energy()
-    display_invarients()
+    # y = Y0[:]
+    # for i in range(STEPS):
+    #     y = fourth_order_kutta(y)
+    #     # y = exp_euler_timestep(y)
+    #     # y = stromer_verlet_timestep(y)
+    #     # y = exp_trapezium(y)
+    #     # y = exp_midpoint(y)
+    #     # y = syplectic_euler(y)
+
+    #     # update the time
+    #     time+=H
+
+    #     update_dta(y)
+
+    # display_trajectories_relative()
+    # # display_total_energy()
+    # display_invarients()
     
-    
-    
-    
-
-
-
-
-
