@@ -165,7 +165,7 @@ class System:
         
         plt.show()
     
-    # UTILITY
+    # UTILITY 
     def cm_frame(Y,masses):
         # returns Y in the CM frame
         px,py,pz = Y.T[0],Y.T[1],Y.T[2]
@@ -281,10 +281,9 @@ if __name__=='__main__':
         
     print("\nFinished integrating, now computing trace and invariants.") 
     
-    solar.make_trace()
+    solar.make_trace() 
     
-    
-    # display the trajectories projected onto 2d
+    # display the trajectories projected onto 2d 
     solar.display_projections_and_energy() 
     
     

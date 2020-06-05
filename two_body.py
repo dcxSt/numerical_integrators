@@ -24,7 +24,7 @@ Y0 = np.array([np.array([.4,0.]),np.array([-.4,0.]),
 
 EPSILON = 10.0 # see projection method 
 H = 0.01 # timestep 
-STEPS = 10000 
+STEPS = 1500
 ENERGY_0 = None # get_energy(Y0) 
 TOTAL_MOMENUM_0 = None # get_total_linear_momentum_abs(Y0)
 TOTAL_ANG_MOMENTUM_0 = None # get_total_angular_momentum(Y0) 
@@ -45,9 +45,10 @@ position_arr = [] # [Y0[2:]]
 time = 0
 time_arr = []
 radius_arr = []
+overflow_count = 0
 
 
-# %% GENERIC HELPER FUNCTIONS
+# %% GENERIC UTILITY FUNCTIONS
 
 # helper function, calculates absolute value squared of vector 
 def normsq(v): 
@@ -61,6 +62,13 @@ def supervec_dot(u,v):
 # same as supervec dot but takes one param and dots it with its self
 def supervec_norm(u):
     return sum([np.dot(i,j) for i,j in zip(u,u)])
+
+# takes streched format vector converts it back to supervec
+def to_supervec(y):
+    yvec = []
+    for i in range(0,len(y),2):
+        yvec.append(np.array(y[i:i+2]))
+    return np.array(yvec)
 
 # %% GRADIANT FUNCTIONS, GRADIENTS OF FIRST INTEGRALS (NABLA)
 
@@ -100,24 +108,14 @@ def nabla_q(q):
     nablaq.append(r*G*M1*M2*(rabs**(-3)))
     return nablaq
 
-# takes the gradient of the total angular momentum
-def nabla_l_bad(y):
-    p1,p2,q1,q2 = y[0],y[1],y[2],y[3]
-    nablal = []
-    nablal.append(np.array([-q1[1],q1[0]]))
-    nablal.append(np.array([-q2[1],q2[0]]))
-    nablal.append(np.array([p1[1],-p1[0]]))
-    nablal.append(np.array([p2[1],-p2[0]]))
-    return np.array(nablal)
-
-# i think this one is more correct - angular momentum
+# i think this one is more correct - angular momentum 
 def nabla_l(y):
     p1,p2,q1,q2 = y[0],y[1],y[2],y[3]
     nablal = []
-    nablal.append(np.array([-q1[1] , q1[0]])) # partial p1
-    nablal.append(np.array([-q2[1] , q2[0]]))
-    nablal.append(np.array([ p1[1] , -p1[0]]))
-    nablal.append(np.array([ p2[1] , - p2[0]]))
+    nablal.append(np.array([q1[1] , -q1[0]])) # partial p1 
+    nablal.append(np.array([q2[1] , -q2[0]])) 
+    nablal.append(np.array([ -p1[1] , p1[0]])) 
+    nablal.append(np.array([ -p2[1] , p2[0]])) 
     return np.array(nablal)
 
 # gradient of the total linear momentum in the x direction
@@ -362,7 +360,7 @@ def naive_first_integral_projection(y,first_integrals=[(get_energy,nabla_H),
     y_proj=y[:]
     # apply each projection one after the other 
     for i in first_integrals:
-        fint,nabla_fint = i[0],i[1](y_proj)
+        fint,nabla_fint = i[0],i[1](y_proj) 
         lambda_i = fint(Y0) - fint(y_proj)
         lambda_i /= supervec_norm(nabla_fint)
         y_proj = y_proj + lambda_i*nabla_fint 
@@ -371,17 +369,48 @@ def naive_first_integral_projection(y,first_integrals=[(get_energy,nabla_H),
         
 # same as naive but does it in k steps (is also k times slower!), also it's only effective if 
 # there are multiple first integrals, no point if there is just one 
-def interated_first_integral_projection(y,k=2,first_integrals=[(get_energy,nabla_H)]):
+def iterated_first_integral_projection(y,k=2,first_integrals=[(get_energy,nabla_H)]):
     y_proj = y[:]
-    # apply k times
+    # apply k times 
     for j in range(k,0,-1):
-        # apply each projection one after the other
-        for i in first_integrals:
-            fint,nabla_fint = i[0],i[1](y_proj)
-            lambda_i = fint(Y0) - fint(y_proj)
+        # apply each projection one after the other 
+        for i in first_integrals: 
+            fint,nabla_fint = i[0],i[1](y_proj) 
+            lambda_i = fint(Y0) - fint(y_proj) 
             lambda_i /= supervec_norm(nabla_fint) 
-            y_proj = y_proj + (lambda_i / k) * nabla_fint
+            y_proj = y_proj + (lambda_i / j) * nabla_fint 
     
+    return y_proj
+
+def first_integral_projection_2(y,first_integrals=[(get_energy,nabla_H),
+                                                   (get_lin_mom_x,nabla_lin_x),
+                                                   (get_lin_mom_y,nabla_lin_y)]):
+    global overflow_count
+    
+    # first compute the gradients
+    fivag = [(i[0](y),i[0](Y0),i[1](y)) for i in first_integrals]
+    finty,fint0,beta = [j[1] for j in fivag],[j[0] for j in fivag],[j[2] for j in fivag]
+    beta_prime = [j[:] for j in beta] # copy of the gradients to be modified
+    
+    # for each j, project all the i's out of the j surface
+    for j in range(len(fivag)):
+        for i in range(len(fivag)):
+            if j != i:
+                try:
+                    beta_i_prime = beta_prime[i] - supervec_dot(beta[j],beta_prime[i]) / supervec_dot(beta[j],beta_prime[j]) * beta_prime[j]
+                    beta_prime[i] = beta_i_prime 
+                except OverflowError("overflow, probably the manifolds have small angle"):
+                    overflow_count+=1 
+    
+    y_proj = y[:] 
+    # project along each axis
+    for e0,ey,b_i_p,b_i in zip(finty,fint0,beta_prime,beta):
+        try:
+            lambda_i = (e0 - ey) / supervec_dot(b_i_p,b_i)
+            y_proj += lambda_i * b_i_p 
+        except OverflowError("overflow in computing lambda_i"):
+            overflow_count+=1
+            
     return y_proj
 
 
@@ -394,7 +423,7 @@ def first_integral_projection(y,first_integrals=[(get_energy,nabla_H),
     fivag = [(i[0](y),i[1](y)) for i in first_integrals] # first integral values and gradients
     
     # keep track of overflow errors
-    overflow_errors = 0
+    global overflow_count
     
     # next compute the adjusted gradients for each of them
     nabla_primes = []
@@ -408,7 +437,7 @@ def first_integral_projection(y,first_integrals=[(get_energy,nabla_H),
                     nabla_i_prime -= difference
                 except OverflowError:
                     print('Overflow error in computing nabla_i_prime at step {}'.format(len(time_arr)))
-                    overflow_errors+=1
+                    overflow_count+=1
 
         nabla_primes.append(nabla_i_prime)
     
@@ -422,7 +451,7 @@ def first_integral_projection(y,first_integrals=[(get_energy,nabla_H),
             lambda_i_prime = numerator / denominator
         except:
             print('Overflow error in computing lambda_i_prime at step {}, setting lambda_i_prime to zer0'.format(len(time_arr)))
-            overflow_errors+=1 
+            overflow_count+=1 
             lambda_i_prime = 0 
         
         lambda_primes.append(lambda_i_prime)
@@ -430,6 +459,49 @@ def first_integral_projection(y,first_integrals=[(get_energy,nabla_H),
     # now project 
     y_projected  = y + sum([i*j for i,j in zip(lambda_primes,nabla_primes)])
     return y_projected
+
+def project_invarient_manifold_standard_newton_iter(y,k=2,first_integrals=[(get_energy,nabla_H),
+                                                             (get_total_angular_momentum,nabla_l)]):
+    # define g and g', g : \R^n \to \R^m
+    def g(y):
+        g = []
+        for fint,nabla in first_integrals:
+            g.append(fint(y)-fint(Y0))
+        return np.array(g)
+    def nablag(y):
+        gprime = []
+        for fint,nabla in first_integrals: 
+            gprime.append(nabla(y)) 
+        return np.array(gprime)
+    def nablag_flat(y):
+        gprime = []
+        for fint,nabla in first_integrals:
+            gprime.append(np.hstack(nabla(y)))
+        return np.array(gprime)
+    
+    y_proj = y[:]
+    
+    # definte initial guess for lambda
+    lambda_vec = []
+    for i in first_integrals: 
+        fint,nabla = i[0],i[1](y_proj) 
+        lambda_i = fint(Y0) - fint(y_proj) 
+        lambda_i /= supervec_norm(nabla) 
+        lambda_vec.append(lambda_i) 
+    lambda_vec = np.array(lambda_vec) 
+    
+    # do a couple newton iterations 
+    nablag_y = nablag(y)
+    nablag_y_flat = nablag_flat(y)
+    csm = np.linalg.inv(np.dot(nablag_y_flat,nablag_y_flat.T)) # constant square matrix
+    for i in range(k):
+        delta_lambda = - np.dot(csm , g(y + to_supervec(np.dot(nablag_y_flat.T,lambda_vec))))
+        lambda_vec = lambda_vec + delta_lambda 
+        
+    # project y 
+    y_proj = y + to_supervec(np.dot(nablag_y_flat.T , lambda_vec))
+    return y_proj
+    
 
 
 # %% DISPLAY AND COMPARE THE INTEGRATORS
@@ -577,16 +649,28 @@ if __name__ == "__main__":
         
         # projection step
         # y = energy_projection(y)
-        y = naive_first_integral_projection(y,first_integrals=[(get_energy,nabla_H),
-                                                                (get_lin_mom_x,nabla_lin_x),
-                                                                (get_lin_mom_y,nabla_lin_y)])
+        # y = naive_first_integral_projection(y,first_integrals=[(get_energy,nabla_H),
+        #                                                         (get_lin_mom_x,nabla_lin_x),
+        #                                                         (get_lin_mom_y,nabla_lin_y)])
+        # y = naive_first_integral_projection(y,first_integrals=[(get_total_angular_momentum,nabla_l)])
+        # y = first_integral_projection_2(y,first_integrals=[(get_energy,nabla_H)]),
+                                                            #(get_lin_mom_x,nabla_lin_x),
+                                                            #(get_lin_mom_y,nabla_lin_y)])
+        # y= iterated_first_integral_projection(y,k=5,first_integrals=[(get_energy,nabla_H),
+        #                                         (get_lin_mom_x,nabla_lin_x),
+        #                                         (get_lin_mom_y,nabla_lin_y)])
         # y = first_integral_projection(y,first_integrals=[(get_total_angular_momentum,nabla_l)])
         # y = first_integral_projection(y,first_integrals=[(get_energy,nabla_H)])
+        
+        # y = project_invarient_manifold_standard_newton_iter(y,k=2,first_integrals=[(get_energy,nabla_H),
+        #                                                                             (get_total_angular_momentum,nabla_l)])
         
         # update the time
         time+=H
 
         update_dta(y)
+        
+    print("overflow occurence : {}".format(overflow_count))
 
     display_trajectories_relative(method_name = method.__name__)
     # display_total_energy()
