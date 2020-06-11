@@ -10,28 +10,31 @@ Created on Fri May 22 13:40:57 2020
 # %% IMPORTS
 import numpy as np 
 import matplotlib.pyplot as plt 
+import itertools
+import math
 
 # %% GLOBAL CONSTANTS
 
 # contants
 G = 1 # gravitational constant
 M1 = 1.0
-M2 = 1.2
+M2 = 1.4
 M = M1+M2
 M_REDUCED = M1*M1 / M
 Y0 = np.array([np.array([.4,0.]),np.array([-.4,0.]),
-               np.array([0.,-1.]),np.array([0.,1.])])# cartesian (p1,p2,q1,q2)
+               np.array([0.,-1.0]),np.array([0.,1.0])])# cartesian (p1,p2,q1,q2)
 
-EPSILON = 10.0 # see projection method 
+# EPSILON = 10.0 # see projection method # depricated 
 H = 0.01 # timestep 
-STEPS = 1500
+STEPS = 100000
 ENERGY_0 = None # get_energy(Y0) 
-TOTAL_MOMENUM_0 = None # get_total_linear_momentum_abs(Y0)
+TOTAL_MOMENUM_0 = None # get_total_linear_momentum_abs(Y0) 
 TOTAL_ANG_MOMENTUM_0 = None # get_total_angular_momentum(Y0) 
 
 NABLA_LIN_X = np.array([np.array([1,0]),np.array([1,0]),np.array([0,0]),np.array([0,0])])
 NABLA_LIN_Y = np.array([np.array([0,1]),np.array([0,1]),np.array([0,0]),np.array([0,0])])
 # go into CM frame by setting net momentum to zero? 
+
 
 
 # %% GLOBAL VARIABLES
@@ -41,10 +44,13 @@ linear_momentum_arr = []
 net_lin_mom_x_arr = []
 net_lin_mom_y_arr = []
 ang_momentum_arr = []
+lev_set_uvec = {"energy":[],"angular_m":[],"linear_x":[],"linear_y":[]} # dict of the angles between first integrals
 position_arr = [] # [Y0[2:]]
+velocity_arr = [] # np.array([Y0[0]/M1 , Y0[1]/M2])
 time = 0
 time_arr = []
 radius_arr = []
+k_factor_arr = []
 overflow_count = 0
 
 
@@ -70,6 +76,13 @@ def to_supervec(y):
         yvec.append(np.array(y[i:i+2]))
     return np.array(yvec)
 
+# this function returns zero when the reduced orbit is circular
+def k_factor(y):
+    # compute the relative velocity squared
+    v_squared = normsq(y[1] / M2 - y[0] / M1)
+    r_abs = math.sqrt(normsq(y[3] - y[2]))
+    return v_squared - G*M / r_abs
+
 # %% GRADIANT FUNCTIONS, GRADIENTS OF FIRST INTEGRALS (NABLA)
 
 # returns y' = J^{-1}\nabla H given y
@@ -85,6 +98,57 @@ def gradient(y):
     grady.append(y[0]/M1)
     grady.append(y[1]/M2)
     return np.array(grady)
+
+# uses ENERGY_0 turns the energy manifold into an attractor
+def modified_gradient_energy_attractor(y):
+    r = np.array([y[2][0]-y[3][0] , y[2][1]-y[3][1]])#r from 1 to 0
+    rabs = np.sqrt(normsq(r))
+    grady = []
+    grady.append(-r*G*M1*M2*(rabs**(-3)))
+    grady.append(r*G*M1*M2*(rabs**(-3)))
+    grady.append(y[0]/M1)
+    grady.append(y[1]/M2) 
+    grady = np.array(grady)
+    # an attracive term is added along nabla H
+    energy_y = get_energy(y)
+    attracting_term = nabla_H(y) 
+    # attracting_term = attracting_term / supervec_norm(attracting_term)
+    attracting_term *= (ENERGY_0 - energy_y) * math.exp(ENERGY_0 - energy_y) /5
+    
+    return grady + attracting_term 
+
+# additionall attracting term to the ENERGY_0 and ANGULAR_M_0 manifolds
+def modified_gradient_en_ang_attractor(y):
+    r = np.array([y[2][0]-y[3][0] , y[2][1]-y[3][1]])#r from 1 to 0
+    rabs = np.sqrt(normsq(r))
+    grady = []
+    grady.append(-r*G*M1*M2*(rabs**(-3)))
+    grady.append(r*G*M1*M2*(rabs**(-3)))
+    grady.append(y[0]/M1)
+    grady.append(y[1]/M2) 
+    grady = np.array(grady)
+    n_grady = math.sqrt(supervec_norm(grady))
+    # an attractive term as in the naive approach, first energy
+    energy_y = get_energy(y)
+    energy_attracting_term = nabla_H(y)
+    energy_attracting_term *= (ENERGY_0 - energy_y) * math.exp(ENERGY_0 - energy_y)
+    e_att_n = np.sqrt(supervec_norm(energy_attracting_term))
+    # make the attracting term smaller than the initial term (1/10th at most)
+    if e_att_n * 10 > n_grady:
+        energy_attracting_term *= n_grady / (10 * e_att_n) 
+    # then angular momentum
+    ang_y = get_total_angular_momentum(y)
+    ang_attracting_term = nabla_l(y)
+    ang_attracting_term *= (TOTAL_ANG_MOMENTUM_0 - ang_y) * math.exp(TOTAL_ANG_MOMENTUM_0 - ang_y)
+    ang_att_n = np.sqrt(supervec_norm(energy_attracting_term))
+    # make the attracting term smaller if it's too big
+    if ang_att_n * 10 > n_grady:
+        ang_attracting_term *= n_grady / (10 * e_att_n)
+    
+    return grady + energy_attracting_term + ang_attracting_term 
+    
+    
+    
 
 # returns the gradient of the hamiltonian
 def nabla_H(y):
@@ -161,17 +225,33 @@ def get_lin_mom_y(y):
 
 # %% STAND ALONE UPDATE DTA
 
+# helper for update_dta, stores the directions each level set is pointing
+def update_lev_set_uvec(y,first_int_nablas):
+    global lev_set_uvec
+    for nabla,name in first_int_nablas:
+        nablay = nabla(y)
+        u_vec = nablay / np.sqrt(supervec_norm(nablay))
+        lev_set_uvec[name].append(u_vec)
+    return
+
 # helper function for keeping track of constants and stuff over time
-def update_dta(y):
+def update_dta(y,first_int_nablas=[(nabla_H,"energy"),
+                                   (nabla_l,"angular_m"),
+                                   (nabla_lin_x,"linear_x"),
+                                   (nabla_lin_y,"linear_y")]):
     global position_arr,energy_arr,ang_momentum_arr,linear_momentum_arr,time_arr,radius_arr
     # update 
-    time_arr.append(time)
+    time_arr.append(time) 
     position_arr.append(y[2:])# update the position array 
-    energy_arr.append(get_energy(y))
-    ang_momentum_arr.append(get_total_angular_momentum(y))
-    linear_momentum_arr.append(get_total_linear_momentum_abs(y))
-    net_lin_mom_x_arr.append(get_lin_mom_x(y))
+    velocity_arr.append(np.array([y[0]/M1 , y[1]/M2]))
+    energy_arr.append(get_energy(y)) 
+    ang_momentum_arr.append(get_total_angular_momentum(y)) 
+    linear_momentum_arr.append(get_total_linear_momentum_abs(y)) 
+    net_lin_mom_x_arr.append(get_lin_mom_x(y)) 
     net_lin_mom_y_arr.append(get_lin_mom_y(y))
+    update_lev_set_uvec(y,first_int_nablas)
+    k_factor_arr.append(k_factor(y))
+    
     
     r = np.array([y[2][0]-y[3][0] , y[2][1]-y[3][1]])#r from 1 to 0
     rabs = np.sqrt(normsq(r))
@@ -195,6 +275,30 @@ def display_trajectories():
     plt.show()
     
 def display_trajectories_relative(method_name=None):
+    fig,ax = plt.subplots(figsize=(10,10))
+    
+    plot_relative_trajectories()
+    
+    if method_name: plt.title('Relative trajectories : h={} , steps={}\nmethod={}'.format(H,STEPS,method_name),fontsize=17)
+    else: plt.title('Relative trajectories : h={} , steps={}'.format(H,STEPS),fontsize=17)
+    plt.show()
+    
+def display_relative(method_name=None):
+    fig,ax = plt.subplots(1,2,figsize=(10,20))
+    
+    plt.subplot(121)
+    plot_relative_trajectories()
+    if method_name: plt.title('Relative trajectories : h={} , steps={}\nmethod={}'.format(H,STEPS,method_name),fontsize=17)
+    else: plt.title('Relative trajectories : h={} , steps={}'.format(H,STEPS),fontsize=17)
+    
+    plt.subplot(122)
+    plot_relative_velocities()
+    if method_name: plt.title('Relative velocities : h={} , steps={}\nmethod={}'.format(H,STEPS,method_name),fontsize=17)
+    else: plt.title('Relative velocities : h={} , steps={}'.format(H,STEPS),fontsize=17)
+    
+    plt.show()
+    
+def plot_relative_trajectories():
     global position_arr
     position_arr = np.array(position_arr)
     m1x = position_arr.T[0][0]
@@ -203,11 +307,20 @@ def display_trajectories_relative(method_name=None):
     m2y = position_arr.T[1][1]
     relative_position = [m1x-m2x , m1y-m2y]
     
-    fig,ax = plt.subplots(figsize=(10,10))
-    ax.plot(relative_position[0],relative_position[1],'-')
-    if method_name: plt.title('Relative trajectories : h={} , steps={}\nmethod={}'.format(H,STEPS,method_name),fontsize=17)
-    else: plt.title('Relative trajectories : h={} , steps={}'.format(H,STEPS),fontsize=17)
-    plt.show()
+    plt.plot(relative_position[0],relative_position[1],'-',alpha=.7,linewidth=0.5)
+    return
+    
+def plot_relative_velocities():
+    global velocity_arr
+    velocity_arr = np.array(velocity_arr)
+    m1vx = velocity_arr.T[0][0]
+    m2vx = velocity_arr.T[0][0]
+    m1vy = velocity_arr.T[1][0]
+    m2vy = velocity_arr.T[1][1]
+    relative_velocity = [m1vx-m2vx , m1vy-m2vy]
+    
+    plt.plot(relative_velocity[0],relative_velocity[1],'-',alpha=.7,linewidth=0.5)
+    return
     
 def display_total_energy():
     # global energy_arr
@@ -231,6 +344,21 @@ def display_total_linear_momentum():
     plt.xlabel('time')
     plt.ylabel('net linear momentum of system')
     
+def plot_invarient_level_set_angles(ls_names=None):
+    if not ls_names: ls_names = lev_set_uvec.keys()
+    for i,j in itertools.combinations(ls_names,r=2):
+        if i != j:
+            u_i,u_j = lev_set_uvec[i],lev_set_uvec[j]
+            # calculate the angle between them and display them
+            angleij = [math.acos(abs(supervec_dot(u_i[k],u_j[k])))*180/np.pi for k in range(len(u_i))] # they should all be the same size
+            # plot the angle
+            plt.plot(time_arr,angleij,label="{} and {}".format(i,j))
+    plt.legend()
+    plt.title("Angles between invarient level sets",fontsize=16) 
+    plt.xlabel('time',fontsize=14) 
+    plt.ylabel('angle',fontsize=14) 
+    
+    
 def display_invarients():
     # the problem here is that they all need to be scalled - ill just do them on different plots for now
     fig,ax = plt.subplots(3,2,figsize=(10,10))
@@ -248,32 +376,35 @@ def display_invarients():
     
     plt.subplot(322)
     plt.plot(time_arr,ang_momentum_arr,label='angular momentum')
-    plt.title('angular momentum\nh={} , steps={}'.format(H,STEPS),fontsize=16)
+    plt.title('angular momentum',fontsize=16)
     plt.xlabel('time',fontsize=14)
-    plt.ylabel('net angular momentum abs of system',fontsize=14)
+    plt.ylabel('net ang momentum of system',fontsize=10)
     plt.legend()
     
     plt.subplot(323)
-    plt.plot(time_arr,linear_momentum_arr,label='linear momentum\nh={} , steps={}'.format(H,STEPS))
+    plt.plot(time_arr,linear_momentum_arr,label='linear moment between them and display um\nh={} , steps={}'.format(H,STEPS))
+    plt.plot(time_arr,net_lin_mom_x_arr,label='lin momentum x')
+    plt.plot(time_arr,net_lin_mom_y_arr,label='lin momentum y')
     plt.title('linear momentum')
     plt.xlabel('time',fontsize=14)
-    plt.ylabel('net linear momentum abs of system',fontsize=14)
+    plt.ylabel('Linear Momentum\nMethod : {}'.format(method.__name__),fontsize=14)
     plt.legend()
     
     plt.subplot(324)
-    plt.plot(time_arr,net_lin_mom_x_arr,label='net linear momentum x array')
-    plt.title('net linear momentum x',fontsize=15)
-    plt.xlabel('time',fontsize=14)
-    plt.ylabel('net linear momentum y')
+    
+    plt.title('----',fontsize=15)
+    plt.xlabel('----',fontsize=14)
+    plt.ylabel('----')
     plt.legend()
     
     plt.subplot(325)
-    plt.plot(time_arr,net_lin_mom_y_arr,label='net linear momentum y array')
-    plt.title('net linear mometnum y',fontsize=15)
+    plt.plot(time_arr,k_factor_arr)
+    plt.title('k factor\nmeasures the eccentricity, zero for circular',fontsize=15)
     plt.xlabel('time',fontsize=14)
     plt.ylabel('net linear momentum y')
     
     plt.subplot(326)
+    plot_invarient_level_set_angles(["energy","angular_m"])
     
     plt.tight_layout()
     
@@ -285,7 +416,16 @@ def exp_euler(y):
     # calculate the gradient
     grady = gradient(y) 
     y_next = y + H*grady 
-    
+    return y_next 
+
+def exp_euler_modified_energy(y):
+    grady_mod = modified_gradient_energy_attractor(y)
+    y_next = y + H*grady_mod
+    return y_next
+
+def exp_euler_modified_energy_ang(y):
+    grady_mod = modified_gradient_en_ang_attractor(y)
+    y_next = y + H*grady_mod
     return y_next 
 
 # advances solution forward one timestep using Stromer-Verlet scheme (p8)
@@ -361,7 +501,7 @@ def naive_first_integral_projection(y,first_integrals=[(get_energy,nabla_H),
     # apply each projection one after the other 
     for i in first_integrals:
         fint,nabla_fint = i[0],i[1](y_proj) 
-        lambda_i = fint(Y0) - fint(y_proj)
+        lambda_i = fint(Y0) - fint(y_proj) 
         lambda_i /= supervec_norm(nabla_fint)
         y_proj = y_proj + lambda_i*nabla_fint 
         
@@ -382,6 +522,7 @@ def iterated_first_integral_projection(y,k=2,first_integrals=[(get_energy,nabla_
     
     return y_proj
 
+
 def first_integral_projection_2(y,first_integrals=[(get_energy,nabla_H),
                                                    (get_lin_mom_x,nabla_lin_x),
                                                    (get_lin_mom_y,nabla_lin_y)]):
@@ -391,6 +532,8 @@ def first_integral_projection_2(y,first_integrals=[(get_energy,nabla_H),
     fivag = [(i[0](y),i[0](Y0),i[1](y)) for i in first_integrals]
     finty,fint0,beta = [j[1] for j in fivag],[j[0] for j in fivag],[j[2] for j in fivag]
     beta_prime = [j[:] for j in beta] # copy of the gradients to be modified
+    
+    # just a check to make sure they all have same energy a
     
     # for each j, project all the i's out of the j surface
     for j in range(len(fivag)):
@@ -417,62 +560,63 @@ def first_integral_projection_2(y,first_integrals=[(get_energy,nabla_H),
 # General first integral projection 
 # takes list of tuples (first integral , gradient function)
 # MATH HERE IS A LITTLE FAULTY, NEEDS REEVALUATING, IN LATEX TOO
-def first_integral_projection(y,first_integrals=[(get_energy,nabla_H),
-                                               (get_total_angular_momentum,nabla_l)]):
-    # first compute the gradients 
-    fivag = [(i[0](y),i[1](y)) for i in first_integrals] # first integral values and gradients
+### DEPRICATED
+# def first_integral_projection(y,first_integrals=[(get_energy,nabla_H),
+#                                                (get_total_angular_momentum,nabla_l)]):
+#     # first compute the gradients 
+#     fivag = [(i[0](y),i[1](y)) for i in first_integrals] # first integral values and gradients
     
-    # keep track of overflow errors
-    global overflow_count
+#     # keep track of overflow errors 
+#     global overflow_count
     
-    # next compute the adjusted gradients for each of them
-    nabla_primes = []
-    for i in range(len(fivag)):
-        nabla_i_prime = fivag[i][1]
-        for j in range(len(fivag)):
-            if i!=j:
-                nabla_j = fivag[j][1]
-                try:
-                    difference = supervec_dot(nabla_i_prime,nabla_j) / supervec_dot(nabla_j,nabla_j) * nabla_j
-                    nabla_i_prime -= difference
-                except OverflowError:
-                    print('Overflow error in computing nabla_i_prime at step {}'.format(len(time_arr)))
-                    overflow_count+=1
+#     # next compute the adjusted gradients for each of them 
+#     nabla_primes = []
+#     for i in range(len(fivag)):
+#         nabla_i_prime = fivag[i][1]
+#         for j in range(len(fivag)):
+#             if i!=j:
+#                 nabla_j = fivag[j][1]
+#                 try:
+#                     difference = supervec_dot(nabla_i_prime,nabla_j) / supervec_dot(nabla_j,nabla_j) * nabla_j
+#                     nabla_i_prime -= difference
+#                 except OverflowError:
+#                     print('Overflow error in computing nabla_i_prime at step {}'.format(len(time_arr)))
+#                     overflow_count+=1
 
-        nabla_primes.append(nabla_i_prime)
+#         nabla_primes.append(nabla_i_prime)
     
-    # now compute the values lambda_i'
-    lambda_primes = [] 
-    for i in range(len(nabla_primes)):
-        try:
-            numerator = first_integrals[i][0](Y0) - fivag[i][0]
-            # to ensure there is no blow up we add an epsilon term to the denominator 
-            denominator = np.abs(supervec_dot(nabla_primes[i],fivag[i][1])) + EPSILON*np.abs(numerator)
-            lambda_i_prime = numerator / denominator
-        except:
-            print('Overflow error in computing lambda_i_prime at step {}, setting lambda_i_prime to zer0'.format(len(time_arr)))
-            overflow_count+=1 
-            lambda_i_prime = 0 
+#     # now compute the values lambda_i'
+#     lambda_primes = [] 
+#     for i in range(len(nabla_primes)):
+#         try:
+#             numerator = first_integrals[i][0](Y0) - fivag[i][0]
+#             # to ensure there is no blow up we add an epsilon term to the denominator 
+#             denominator = np.abs(supervec_dot(nabla_primes[i],fivag[i][1])) + EPSILON*np.abs(numerator)
+#             lambda_i_prime = numerator / denominator
+#         except:
+#             print('Overflow error in computing lambda_i_prime at step {}, setting lambda_i_prime to zer0'.format(len(time_arr)))
+#             overflow_count+=1 
+#             lambda_i_prime = 0 
         
-        lambda_primes.append(lambda_i_prime)
+#         lambda_primes.append(lambda_i_prime)
         
-    # now project 
-    y_projected  = y + sum([i*j for i,j in zip(lambda_primes,nabla_primes)])
-    return y_projected
+#     # now project 
+#     y_projected  = y + sum([i*j for i,j in zip(lambda_primes,nabla_primes)])
+#     return y_projected
 
 def project_invarient_manifold_standard_newton_iter(y,k=2,first_integrals=[(get_energy,nabla_H),
                                                              (get_total_angular_momentum,nabla_l)]):
-    # define g and g', g : \R^n \to \R^m
+    # define g and g', g : \R^n \to \R^m 
     def g(y):
         g = []
         for fint,nabla in first_integrals:
             g.append(fint(y)-fint(Y0))
         return np.array(g)
-    def nablag(y):
-        gprime = []
-        for fint,nabla in first_integrals: 
-            gprime.append(nabla(y)) 
-        return np.array(gprime)
+    # def nablag(y):
+    #     gprime = []
+    #     for fint,nabla in first_integrals: 
+    #         gprime.append(nabla(y)) 
+    #     return np.array(gprime)
     def nablag_flat(y):
         gprime = []
         for fint,nabla in first_integrals:
@@ -490,17 +634,20 @@ def project_invarient_manifold_standard_newton_iter(y,k=2,first_integrals=[(get_
         lambda_vec.append(lambda_i) 
     lambda_vec = np.array(lambda_vec) 
     
-    # do a couple newton iterations 
-    nablag_y = nablag(y)
+    # do a couple newton iterations
     nablag_y_flat = nablag_flat(y)
-    csm = np.linalg.inv(np.dot(nablag_y_flat,nablag_y_flat.T)) # constant square matrix
-    for i in range(k):
-        delta_lambda = - np.dot(csm , g(y + to_supervec(np.dot(nablag_y_flat.T,lambda_vec))))
-        lambda_vec = lambda_vec + delta_lambda 
+    try:
+        csm = np.linalg.inv(np.dot(nablag_y_flat,nablag_y_flat.T)) # constant square matrix
+        for i in range(k):
+            delta_lambda = - np.dot(csm , g(y + to_supervec(np.dot(nablag_y_flat.T,lambda_vec))))
+            lambda_vec = lambda_vec + delta_lambda 
         
-    # project y 
-    y_proj = y + to_supervec(np.dot(nablag_y_flat.T , lambda_vec))
-    return y_proj
+        # project y 
+        y_proj = y + to_supervec(np.dot(nablag_y_flat.T , lambda_vec))
+    except:
+        print("Singular matrix, projection not possible")
+        
+    return y_proj 
     
 
 
@@ -624,6 +771,15 @@ def compare_energy_projection(method):
         radius_arr = []
     
     return data
+
+def display_relative_velocity():
+    return
+
+
+def define_starting_momentum(E,L,q1,q2,p1):
+    global Y0
+    # solve ang momentum for p21 and sub into energy eq 
+    a = np.linalg.norm()
         
 # %% INITIALIZE CONSTANTS THAT REQUIRE FUNCTIONS
 ENERGY_0 = get_energy(Y0)
@@ -631,6 +787,67 @@ TOTAL_MOMENUM_0 = get_total_linear_momentum_abs(Y0)
 TOTAL_ANG_MOMENTUM_0 = get_total_angular_momentum(Y0)
 
 # %% main
+# if __name__ == "__main__":
+#     # choose a bunch of starting positions, 
+#     # make sure they are all elliptical with the same energy and angular momentum
+#     # to do this you can just rotate them
+#     # y1 = np.array([np.array([.8,0.]),np.array([-.8,0.]),
+#     #             np.array([0.,-0.3]),np.array([0.,0.3])])
+#     y1 = np.array([np.array([.4,0.]),np.array([-.4,0.]),
+#                np.array([0.,-1.0]),np.array([0.,1.0])])
+    
+#     Y0 = y1[:]
+#     y_arr = []
+#     for i in range(5):
+#         yi = []
+#         # the following two lines are only valid for when y1[0][1] and y1[1][1] are zero
+#         yi.append(np.array([y1[0][0]*math.cos(i*math.pi/3) , y1[0][0]*math.sin(i*math.pi/3)]))
+#         yi.append(np.array([y1[1][0]*math.cos(i*math.pi/3) , y1[1][0]*math.sin(i*math.pi/3)]))
+#         yi.append(y1[2])
+#         yi.append(y1[3])
+#         y_arr.append(yi)
+#     # advance each 100 time units, or 10000 time-steps with projections and exp euler method
+#     energies = [get_energy(y) for y in y_arr]
+    
+#     method = exp_euler 
+    
+#     steps_per_leap = 7000
+#     H = 0.01 
+#     for i in range(15): 
+#         traces = [] 
+#         everything_traces = []
+#         for k in range(len(y_arr)): 
+#             y = y_arr[k]
+#             trace2 = []
+#             # time evolve it x steps 
+#             for j in range(steps_per_leap): 
+#                 y = method(y) 
+#                 # projection 
+#                 y = first_integral_projection_2(y,first_integrals=[(get_energy,nabla_H),
+#                                                     (get_total_angular_momentum,nabla_l)])
+                
+#                 # calculate the relative velocity and append it to the traces
+#                 if j % 11==0:
+#                     trace2.append(y[2:])
+            
+#             # redefine y_arr to update it and update traces 
+#             y_arr[k] = y 
+#             traces.append(trace2[:]) 
+#         # display the traces 
+#         plt.figure() 
+#         for trace in traces: 
+#             # get the velocities 
+#             trace2 = np.array(trace2)
+#             m1x = trace2.T[0][0]
+#             m2x = trace2.T[0][1]
+#             m1y = trace2.T[1][0]
+#             m2y = trace2.T[1][1]
+#             relative_position = [m1x-m2x , m1y-m2y]
+#             plt.plot(relative_position[0],relative_position[1],'x',alpha=.5)
+#         plt.show() 
+    
+    
+    
 if __name__ == "__main__":
     # data = compare_methods([stromer_verlet_timestep,
     #                         fourth_order_kutta])
@@ -639,41 +856,56 @@ if __name__ == "__main__":
     
     y = Y0[:]
     for i in range(STEPS):
-        method = exp_euler
+        # method = exp_euler 
+        # method = exp_euler_modified_energy_ang 
+        method = exp_euler 
+        y = method(y)
+        
         # y = fourth_order_kutta(y)
         # y = exp_euler(y)
-        y = method(y)
         # y = exp_trapezium(y)
         # y = exp_midpoint(y)
         # y = syplectic_euler(y)
         
         # projection step
         # y = energy_projection(y)
+        
         # y = naive_first_integral_projection(y,first_integrals=[(get_energy,nabla_H),
-        #                                                         (get_lin_mom_x,nabla_lin_x),
-        #                                                         (get_lin_mom_y,nabla_lin_y)])
+        #                                                         (get_total_angular_momentum,nabla_l)])
+                                                                # (get_lin_mom_x,nabla_lin_x),
+                                                                # (get_lin_mom_y,nabla_lin_y),
+                                                                # (get_total_angular_momentum,nabla_l)])
+        
+        
         # y = naive_first_integral_projection(y,first_integrals=[(get_total_angular_momentum,nabla_l)])
-        # y = first_integral_projection_2(y,first_integrals=[(get_energy,nabla_H)]),
+        # y = first_integral_projection_2(y,first_integrals=[(get_energy,nabla_H),
+        #                                     (get_total_angular_momentum,nabla_l)])
                                                             #(get_lin_mom_x,nabla_lin_x),
                                                             #(get_lin_mom_y,nabla_lin_y)])
+        
         # y= iterated_first_integral_projection(y,k=5,first_integrals=[(get_energy,nabla_H),
-        #                                         (get_lin_mom_x,nabla_lin_x),
-        #                                         (get_lin_mom_y,nabla_lin_y)])
-        # y = first_integral_projection(y,first_integrals=[(get_total_angular_momentum,nabla_l)])
-        # y = first_integral_projection(y,first_integrals=[(get_energy,nabla_H)])
+        #                                                              (get_total_angular_momentum,nabla_l)])
         
-        # y = project_invarient_manifold_standard_newton_iter(y,k=2,first_integrals=[(get_energy,nabla_H),
-        #                                                                             (get_total_angular_momentum,nabla_l)])
+        y = project_invarient_manifold_standard_newton_iter(y,k=2,first_integrals=[(get_energy,nabla_H),
+                                                                                    (get_total_angular_momentum,nabla_l)])
         
-        # update the time
-        time+=H
-
-        update_dta(y)
+        # update every k steps 
+        k=10
+        if i%k==0:
+            time+=H*k
+            update_dta(y)
         
-    print("overflow occurence : {}".format(overflow_count))
-
-    display_trajectories_relative(method_name = method.__name__)
-    # display_total_energy()
+    print("overflow occurence : {}".format(overflow_count)) 
+    
+    # DISPLAY
+    # before displaying you may want to take off some of the data from the trajcetories so that you can see what the 'stable orbit' looks like
+    # CHUCK = 300000
+    # try:
+    #     position_arr = position_arr[CHUCK:]
+    # except:
+    #     print("position array too small to chuck anything, not gonna do it")
+    display_relative(method_name = method.__name__)
+    # display_total_energy() 
     display_invarients()
     plt.show()
     

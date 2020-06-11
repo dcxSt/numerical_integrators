@@ -18,12 +18,12 @@ class System:
     H = 0.001
     STEPS = 50000
     # canonical symplectic form
-    J = np.array([[0,0,0,1,0,0],
-                   [0,0,0,0,1,0],
-                   [0,0,0,0,0,1],
-                   [-1,0,0,0,0,0],
-                   [0,-1,0,0,0,0],
-                   [0,0,-1,0,0,0]])
+    J = np.array([[0,0,0,-1,0,0],
+                   [0,0,0,0,-1,0],
+                   [0,0,0,0,0,-1],
+                   [1,0,0,0,0,0],
+                   [0,1,0,0,0,0],
+                   [0,0,1,0,0,0]])
     
     def __init__(self,Y0,masses,names=None):
         # Object Attributes
@@ -62,17 +62,38 @@ class System:
     def get_net_lin_momentum(self):
         return sum([i[:3] for i in self.Y])
     
-    def get_angular_momentum():
-        return 
+    def get_angular_momentum(self):
+        return sum([planet.get_ang_mom() for planet in self.planets])
     
     # GRADIENTS AND VECTOR QUANTITIES
     def get_nabla_H(self):
         # calculate nabla h for each of the planets and put them into a matrix (list of arrays)
         return np.array([p.nabla_H(self.planets) for p in self.planets])
     
+    # returns a 3 by n matrix and compute the nabla 
+    def nabla_q(self,q_matrix=None):
+        if not isinstance(q_matrix,np.ndarray) :
+            return np.array([p.nabla_q(self.planets) for p in self.planets])
+        # if a q_matrix is given calculate as if the planets where in the positions specified by it
+        else:
+            sh = q_matrix.shape
+            pot_grad = np.zeros(sh[0]*sh[1]).reshape(sh)
+            for idx,(planet_1,q1) in enumerate(zip(self.planets,q_matrix)):
+                for planet_2,q2 in zip(self.planets,q_matrix):
+                    if planet_1 != planet_2:
+                        pot_grad[idx] = pot_grad[idx] - System.G * planet_1.m * planet_2.m / np.linalg.norm(planet_1.radius(planet_2))**3 * planet_1.radius(planet_2)
+            return pot_grad
+    
     def get_flow_derivative(self): 
         fd = np.array([planet.flow_derivative(self.planets) for planet in self.planets]) 
         return fd 
+    
+    # returns nabla l x and y and z, each is it's own matrix
+    def nabla_l_xyz(self):
+        nabla_lx = np.array([p.nabla_lx() for p in self.planets])
+        nabla_ly = np.array([p.nabla_ly() for p in self.planets])
+        nabla_lz = np.array([p.nabla_lz() for p in self.planets])
+        return nabla_lx,nabla_ly,nabla_lz 
     
     # AND SETTERS 
     # add a planet to the system 
@@ -97,7 +118,7 @@ class System:
             planet.update_y(y_next) 
         return 
             
-    # takes the traces y componants of each planet and makes a bit matrix trace for the whole system
+    # takes the traces y componants of each planet and makes a big matrix trace for the whole system
     def make_trace(self):
         print('Calculating Trace...',end="\t")
         self.trace = [] 
@@ -116,6 +137,26 @@ class System:
         Y_next = np.array(self.Y) + System.H * flow_derivative 
         self.Y = Y_next
         return
+    
+    # stomer verlet timestep
+    # assumes that Y and each planet's y are in agreement
+    def stromer_verlet_timestep(self):
+        flow_derivative = self.get_flow_derivative() # 6 by n matrix 
+        # STEP 1 
+        x0 = self.Y.T[:3].T # trace 
+        p_plushalf = self.Y.T[:3].T + 0.5 * System.H * flow_derivative.T[:3].T
+        v_plushalf = np.array([i/p.m for i,p in zip(p_plushalf,self.planets)])
+        # STEP 2 
+        x1 = self.Y.T[3:].T # trace 
+        q_next = self.Y.T[3:].T + System.H * v_plushalf 
+        # STEP 3 
+        nabla_q_next = self.nabla_q(q_next)
+        p_next = p_plushalf - 0.5 * System.H * nabla_q_next
+        x3 = self.Y # trace 
+        self.Y = np.concatenate([p_next,q_next],axis=1)
+        x4=self.Y # trace 
+        return
+        
     
     # DISPLAY
     def display_xy_projection(self):
@@ -212,6 +253,9 @@ class Planet:
     def get_position(self):
         return self.y[3:]
     
+    def get_ang_mom(self):
+        return np.linalg.cross(self.y[:3],self.y[3:])
+    
     def radius(self,planet):
         # returns the vector from this planet pointing to the planet planet
         rad =  planet.y[3:] - self.y[3:] 
@@ -228,10 +272,26 @@ class Planet:
             if self != planet:
                 pot_grad = pot_grad - System.G * planet.m * self.m / np.linalg.norm(self.radius(planet))**3 * self.radius(planet)
         return np.concatenate([nabla_p , pot_grad])
+    
+    # derivative only of q
+    def nabla_q(self,planets):
+        pot_grad = np.array([0.0,0.0,0.0])
+        for planet in planets:
+            if self != planet:
+                pot_grad = pot_grad - System.G * planet.m * self.m / np.linalg.norm(self.radius(planet))**3 * self.radius(planet)
+        return pot_grad
         
     def flow_derivative(self,planets):
         nabla_h = self.nabla_H(planets)
         return np.concatenate([-nabla_h[3:] , nabla_h[:3]])
+    
+    # returns the angular momentum gradient vectors
+    def nabla_lx(self):
+        return np.array([0,self.y[5],-self.y[4],0,-self.y[2],self.y[1]])
+    def nabla_ly(self):
+        return np.array([-self.y[5],0,self.y[3],self.y[2],0,-self.y[0]])
+    def nable_lz(self):
+        return np.array([self.y[4],-self.y[3],0,-self.y[0],self.y[0],0])
     
     
     # MODIFIERS 
@@ -275,7 +335,9 @@ if __name__=='__main__':
     
     # time evolve the system a bunch then display 2d projections of trajectories
     for i in range(System.STEPS): 
-        solar.explicit_euler_timestep() 
+        solar.stromer_verlet_timestep() 
+        # solar.naive_first_integral_projection(first_integrals=[(get_energy,get_nabla_H),
+        #                                                        (get_angular_momentum,nabla_l))]) 
         solar.update_energies()
         solar.update_planets() 
         
