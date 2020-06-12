@@ -21,12 +21,12 @@ M1 = 1.0
 M2 = 1.4
 M = M1+M2
 M_REDUCED = M1*M1 / M
-Y0 = np.array([np.array([.4,0.]),np.array([-.4,0.]),
+Y0 = np.array([np.array([.4,0.1]),np.array([-.4,-0.1]),
                np.array([0.,-1.0]),np.array([0.,1.0])])# cartesian (p1,p2,q1,q2)
 
 # EPSILON = 10.0 # see projection method # depricated 
-H = 0.01 # timestep 
-STEPS = 100000
+H = 0.05 # timestep 
+STEPS = 1000000
 ENERGY_0 = None # get_energy(Y0) 
 TOTAL_MOMENUM_0 = None # get_total_linear_momentum_abs(Y0) 
 TOTAL_ANG_MOMENTUM_0 = None # get_total_angular_momentum(Y0) 
@@ -283,22 +283,22 @@ def display_trajectories_relative(method_name=None):
     else: plt.title('Relative trajectories : h={} , steps={}'.format(H,STEPS),fontsize=17)
     plt.show()
     
-def display_relative(method_name=None):
-    fig,ax = plt.subplots(1,2,figsize=(10,20))
+def display_relative(steps_sep=0.5,method_name=None,projection_type='None'):
+    fig,ax = plt.subplots(1,2,figsize=(20,10))
     
     plt.subplot(121)
-    plot_relative_trajectories()
-    if method_name: plt.title('Relative trajectories : h={} , steps={}\nmethod={}'.format(H,STEPS,method_name),fontsize=17)
+    plot_relative_trajectories(steps_sep=steps_sep)
+    if method_name: plt.title('Relative trajectories : h={} , steps={}\nmethod={}  proj={}'.format(H,STEPS,method_name,projection_type),fontsize=17)
     else: plt.title('Relative trajectories : h={} , steps={}'.format(H,STEPS),fontsize=17)
     
     plt.subplot(122)
-    plot_relative_velocities()
-    if method_name: plt.title('Relative velocities : h={} , steps={}\nmethod={}'.format(H,STEPS,method_name),fontsize=17)
+    plot_relative_velocities(steps_sep=steps_sep)
+    if method_name: plt.title('Relative velocities : h={} , steps={}\nmethod={}  proj={}'.format(H,STEPS,method_name,projection_type),fontsize=17)
     else: plt.title('Relative velocities : h={} , steps={}'.format(H,STEPS),fontsize=17)
     
     plt.show()
     
-def plot_relative_trajectories():
+def plot_relative_trajectories(steps_sep=None):
     global position_arr
     position_arr = np.array(position_arr)
     m1x = position_arr.T[0][0]
@@ -307,19 +307,45 @@ def plot_relative_trajectories():
     m2y = position_arr.T[1][1]
     relative_position = [m1x-m2x , m1y-m2y]
     
-    plt.plot(relative_position[0],relative_position[1],'-',alpha=.7,linewidth=0.5)
+    cutoff=None
+    if isinstance(steps_sep,tuple):# can take steps_sep as rational number quotien like (1,4) is one quarter
+        cutoff = int(len(position_arr)*steps_sep[0]/steps_sep[1])
+    elif isinstance(steps_sep,int):
+        cutoff = steps_sep
+    elif isinstance(steps_sep,float):# should be < 1
+        cutoff = int(steps_sep*len(position_arr))
+        
+    if cutoff:
+        plt.plot(relative_position[0][:cutoff],relative_position[1][:cutoff],'-',alpha=.7,linewidth=0.5,label='first part')
+        plt.plot(relative_position[0][cutoff:],relative_position[1][cutoff:],'-',alpha=.7,linewidth=0.5,label='latter part')
+        plt.legend()
+    else:
+        plt.plot(relative_position[0],relative_position[1],'-',alpha=.7,linewidth=0.5)
     return
     
-def plot_relative_velocities():
+def plot_relative_velocities(steps_sep=None):
     global velocity_arr
     velocity_arr = np.array(velocity_arr)
     m1vx = velocity_arr.T[0][0]
-    m2vx = velocity_arr.T[0][0]
+    m2vx = velocity_arr.T[0][1]
     m1vy = velocity_arr.T[1][0]
     m2vy = velocity_arr.T[1][1]
     relative_velocity = [m1vx-m2vx , m1vy-m2vy]
     
-    plt.plot(relative_velocity[0],relative_velocity[1],'-',alpha=.7,linewidth=0.5)
+    cutoff=None
+    if isinstance(steps_sep,tuple):
+        cutoff = int(len(velocity_arr)*steps_sep[0]/steps_sep[1])
+    elif isinstance(steps_sep,int):
+        cutoff = steps_sep
+    elif isinstance(steps_sep,float):
+        cutoff = int(steps_sep*len(velocity_arr))
+    
+    if cutoff:
+        plt.plot(relative_velocity[0][:cutoff],relative_velocity[1][:cutoff],'-',alpha=.7,linewidth=0.5,label='first part')
+        plt.plot(relative_velocity[0][cutoff:],relative_velocity[1][cutoff:],'-',alpha=.7,linewidth=0.5,label='latter part')
+        plt.legend() 
+    else:
+        plt.plot(relative_velocity[0],relative_velocity[1],'-',alpha=.7,linewidth=0.5)
     return
     
 def display_total_energy():
@@ -361,7 +387,7 @@ def plot_invarient_level_set_angles(ls_names=None):
     
 def display_invarients():
     # the problem here is that they all need to be scalled - ill just do them on different plots for now
-    fig,ax = plt.subplots(3,2,figsize=(10,10))
+    fig,ax = plt.subplots(3,2,figsize=(12,15))
     plt.subplot(321)
     plt.plot(time_arr,energy_arr,label='energy')
     # # scale the radius and do a comparison
@@ -371,42 +397,42 @@ def display_invarients():
     
     plt.xlabel('time')
     plt.ylabel('net energy of the system')    
-    plt.title('energy\nh={} , steps={}'.format(H,STEPS))
+    plt.title('energy\nh={} , steps={}'.format(H,STEPS),fontsize=14)
     plt.legend(fontsize=14)
     
     plt.subplot(322)
     plt.plot(time_arr,ang_momentum_arr,label='angular momentum')
-    plt.title('angular momentum',fontsize=16)
+    plt.title('angular momentum',fontsize=14)
     plt.xlabel('time',fontsize=14)
     plt.ylabel('net ang momentum of system',fontsize=10)
     plt.legend()
     
     plt.subplot(323)
-    plt.plot(time_arr,linear_momentum_arr,label='linear moment between them and display um\nh={} , steps={}'.format(H,STEPS))
-    plt.plot(time_arr,net_lin_mom_x_arr,label='lin momentum x')
-    plt.plot(time_arr,net_lin_mom_y_arr,label='lin momentum y')
-    plt.title('linear momentum')
-    plt.xlabel('time',fontsize=14)
-    plt.ylabel('Linear Momentum\nMethod : {}'.format(method.__name__),fontsize=14)
+    plt.plot(time_arr,linear_momentum_arr,label='net linear moment')
+    plt.plot(time_arr,net_lin_mom_x_arr,label='lin mom x')
+    plt.plot(time_arr,net_lin_mom_y_arr,label='lin mom y')
+    plt.title('Linear Momentum\nMethod : {}'.format(method.__name__),fontsize=14)
+    plt.xlabel('time',fontsize=12)
+    plt.ylabel('Linear Momentum',fontsize=14)
     plt.legend()
     
     plt.subplot(324)
-    
-    plt.title('----',fontsize=15)
-    plt.xlabel('----',fontsize=14)
-    plt.ylabel('----')
-    plt.legend()
+    plot_relative_trajectories(steps_sep=0.5)
+    # edited to use projection name, global variable
+    plt.title('Relative trajectories\nProjection : {}'.format(projection_name),fontsize=14)
+    plt.xlabel('relative position x',fontsize=12)
+    plt.ylabel('relative position y',fontsize=12)
     
     plt.subplot(325)
     plt.plot(time_arr,k_factor_arr)
-    plt.title('k factor\nmeasures the eccentricity, zero for circular',fontsize=15)
+    plt.title('k factor\nmeasures the eccentricity, zero for circular',fontsize=14)
     plt.xlabel('time',fontsize=14)
     plt.ylabel('net linear momentum y')
     
     plt.subplot(326)
     plot_invarient_level_set_angles(["energy","angular_m"])
     
-    plt.tight_layout()
+    plt.tight_layout() 
     
 
 # %% NUMERICAL FLOW FUNCTIONS
@@ -495,7 +521,7 @@ def energy_projection(y):
     
 # naive should be same as other if manifold tanjent spaces are perpendicular 
 # this method can do with some optimization (/ refactoring) 
-def naive_first_integral_projection(y,first_integrals=[(get_energy,nabla_H),
+def naive_projection(y,first_integrals=[(get_energy,nabla_H),
                                                (get_total_angular_momentum,nabla_l)]):
     y_proj=y[:]
     # apply each projection one after the other 
@@ -509,7 +535,7 @@ def naive_first_integral_projection(y,first_integrals=[(get_energy,nabla_H),
         
 # same as naive but does it in k steps (is also k times slower!), also it's only effective if 
 # there are multiple first integrals, no point if there is just one 
-def iterated_first_integral_projection(y,k=2,first_integrals=[(get_energy,nabla_H)]):
+def iterated_projection(y,k=5,first_integrals=[(get_energy,nabla_H)]):
     y_proj = y[:]
     # apply k times 
     for j in range(k,0,-1):
@@ -523,7 +549,7 @@ def iterated_first_integral_projection(y,k=2,first_integrals=[(get_energy,nabla_
     return y_proj
 
 
-def first_integral_projection_2(y,first_integrals=[(get_energy,nabla_H),
+def parallel_projection(y,first_integrals=[(get_energy,nabla_H),
                                                    (get_lin_mom_x,nabla_lin_x),
                                                    (get_lin_mom_y,nabla_lin_y)]):
     global overflow_count
@@ -604,7 +630,7 @@ def first_integral_projection_2(y,first_integrals=[(get_energy,nabla_H),
 #     y_projected  = y + sum([i*j for i,j in zip(lambda_primes,nabla_primes)])
 #     return y_projected
 
-def project_invarient_manifold_standard_newton_iter(y,k=2,first_integrals=[(get_energy,nabla_H),
+def standard_projection(y,k=2,first_integrals=[(get_energy,nabla_H),
                                                              (get_total_angular_momentum,nabla_l)]):
     # define g and g', g : \R^n \to \R^m 
     def g(y):
@@ -775,11 +801,12 @@ def compare_energy_projection(method):
 def display_relative_velocity():
     return
 
-
+# under construction 
 def define_starting_momentum(E,L,q1,q2,p1):
     global Y0
     # solve ang momentum for p21 and sub into energy eq 
     a = np.linalg.norm()
+    return
         
 # %% INITIALIZE CONSTANTS THAT REQUIRE FUNCTIONS
 ENERGY_0 = get_energy(Y0)
@@ -849,48 +876,39 @@ TOTAL_ANG_MOMENTUM_0 = get_total_angular_momentum(Y0)
     
     
 if __name__ == "__main__":
-    # data = compare_methods([stromer_verlet_timestep,
-    #                         fourth_order_kutta])
-    # data = compare_energy_projection(syplectic_euler)
-    # display_compare_methods(data)
     
     y = Y0[:]
+    # # project onto the 
+    # Y0 = parallel_projection(Y0,first_integrals=[(get_lin_mom_x,nabla_lin_x),
+    #                                              (get_lin_mom_y,nabla_lin_y)])
+    
+    # method = fourth_order_kutta(y)
+    # method = exp_euler(y)
+    # method = exp_trapezium(y)
+    # method = exp_midpoint(y)
+    # method = syplectic_euler(y)
+    # method = stromer_verlet
+    method = stromer_verlet
+    projections = {"None":None,
+                   "Naive":naive_projection,
+                   "Iterated":iterated_projection,
+                   "Parallel":parallel_projection,
+                   "Standard":standard_projection}
+    projection_name = "Naive"
+    projection = projections[projection_name]
+    
     for i in range(STEPS):
-        # method = exp_euler 
-        # method = exp_euler_modified_energy_ang 
-        method = exp_euler 
         y = method(y)
         
-        # y = fourth_order_kutta(y)
-        # y = exp_euler(y)
-        # y = exp_trapezium(y)
-        # y = exp_midpoint(y)
-        # y = syplectic_euler(y)
+        
         
         # projection step
-        # y = energy_projection(y)
-        
-        # y = naive_first_integral_projection(y,first_integrals=[(get_energy,nabla_H),
-        #                                                         (get_total_angular_momentum,nabla_l)])
-                                                                # (get_lin_mom_x,nabla_lin_x),
-                                                                # (get_lin_mom_y,nabla_lin_y),
-                                                                # (get_total_angular_momentum,nabla_l)])
-        
-        
-        # y = naive_first_integral_projection(y,first_integrals=[(get_total_angular_momentum,nabla_l)])
-        # y = first_integral_projection_2(y,first_integrals=[(get_energy,nabla_H),
-        #                                     (get_total_angular_momentum,nabla_l)])
-                                                            #(get_lin_mom_x,nabla_lin_x),
-                                                            #(get_lin_mom_y,nabla_lin_y)])
-        
-        # y= iterated_first_integral_projection(y,k=5,first_integrals=[(get_energy,nabla_H),
-        #                                                              (get_total_angular_momentum,nabla_l)])
-        
-        y = project_invarient_manifold_standard_newton_iter(y,k=2,first_integrals=[(get_energy,nabla_H),
-                                                                                    (get_total_angular_momentum,nabla_l)])
+        if projection!=None:
+            y = projection(y,first_integrals=[(get_energy,nabla_H),
+                                              (get_total_angular_momentum,nabla_l)])
         
         # update every k steps 
-        k=10
+        k=25
         if i%k==0:
             time+=H*k
             update_dta(y)
@@ -904,8 +922,9 @@ if __name__ == "__main__":
     #     position_arr = position_arr[CHUCK:]
     # except:
     #     print("position array too small to chuck anything, not gonna do it")
-    display_relative(method_name = method.__name__)
+    display_relative(steps_sep=0.5,method_name = method.__name__,projection_type=projection_name)
     # display_total_energy() 
     display_invarients()
+    plt.savefig("./figures/gallary/invarients_config4_{}_{}_h={}_STEPS={}.png".format(method.__name__,projection_name,H,STEPS))
     plt.show()
     
