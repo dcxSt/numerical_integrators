@@ -9,16 +9,22 @@ Created on Tue Jun  2 01:17:07 2020
 
 # %% IMPORTS 
 import numpy as np
-import warnings
 import matplotlib.pyplot as plt
+import math
+import itertools
 np.seterr(all='warn')
+
+# %% GENERAL PURPOSE UTILITY SHORTCUTS
+def flat(y):    return np.ndarray.flatten(y)
+def norm(y):    return np.linalg.norm(y)
+def dot(x,y):     return np.dot(flat(x),flat(y)) # dots tensors as if they were vectors
 
 # %% CLASS SYSTEM 
 class System:
     # Class attributes
     G = 1
     H = 0.001
-    STEPS = 50000
+    STEPS = 1000000
     # canonical symplectic form
     J = np.array([[0,0,0,-1,0,0],
                    [0,0,0,0,-1,0],
@@ -52,6 +58,7 @@ class System:
             self.planets.append(Planet(y0,m,name)) 
             self.PLANETS_START_STATE.append(Planet(y0,m,name))
             
+        # the two things below are the same weapon but can be used differently
         self.FIRST_INTEGRALS = [(System.get_energy,System.get_nabla_H),
                         (System.get_ang_mom_x,System.nabla_p_x),
                         (System.get_ang_mom_y,System.nabla_p_y),
@@ -60,11 +67,20 @@ class System:
                         (System.get_lin_mom_y,System.nabla_p_y),
                         (System.get_lin_mom_z,System.nabla_p_z)]
         
+        self.FIRST_INT_DIC = {
+            "energy":(self.get_energy , self.get_nabla_H),
+            "lin x":(self.get_lin_mom_x , self.nabla_p_x),
+            "lin y":(self.get_lin_mom_y , self.nabla_p_y),
+            "lin z":(self.get_lin_mom_z , self.nabla_p_z),
+            "ang x":(self.get_ang_mom_x , self.nabla_l_x),
+            "ang y":(self.get_ang_mom_y , self.nabla_l_y),
+            "ang z":(self.get_ang_mom_y , self.nabla_l_y)
+            }
+        
         return
             
-    # %%
     # GETTERS
-    # INVARIENTS AND SCALAR QUANTITIES 
+    # %% INVARIENTS AND SCALAR QUANTITIES 
     # the boolean initial state parameter determines whether to return the current 
     
     # returns the energy of the system
@@ -112,7 +128,7 @@ class System:
         return sum([p.get_ang_mom()[2] for p in self.planets]) 
     
     
-    # GRADIENTS AND VECTOR QUANTITIES 
+    # %%GRADIENTS AND VECTOR QUANTITIES 
     def get_nabla_H(self):
         # calculate nabla h for each of the planets and put them into a matrix (list of arrays)
         return np.array([p.nabla_H(self.planets) for p in self.planets])
@@ -164,6 +180,9 @@ class System:
         return np.array([np.array([0,1,0,0,0,0]) for i in range(len(self.planets))])
     def nabla_p_z(self):
         return np.array([np.array([0,0,1,0,0,0]) for i in range(len(self.planets))])
+    
+    # %% misk quantities
+    
     
     
     # %% AND SETTERS 
@@ -239,11 +258,46 @@ class System:
             lambda_i = fint(self,initial_state=True) - fint(self)
             # tracevar = np.linalg.norm(nabla_fint)
             # try:
-            lambda_i = lambda_i/ np.linalg.norm(nabla_fint)**2 
+            lambda_i /= np.linalg.norm(nabla_fint)**2 
             
             self.Y = self.Y + lambda_i * nabla_fint 
         return
+    
+    # same as naive but does so in k steps (so it is k times slower, but same O of rate in STEPS)
+    def iterated_projection(self,k=5,first_integrals=None):
+        if first_integrals==None:
+            first_integrals = self.FIRST_INTEGRALS # all of them
+        for l in range(k,0,-1):
+            # apply each projection one after the other
+            for i,j in first_integrals:
+                fint,nabla_fint = j,j(self)
+                lambda_i = fint(self,initial_state=True) - fint(self)
+                lambda_i /= np.linalg.norm(nabla_fint)**2
+                
+                self.Y = self.Y + (lambda_i / l) * nabla_fint 
+        return
+    
+    # this is the projection method I made up and have in the report
+    def parallel_projection(self,first_integrals=None):
+        if first_integrals==None:
+            first_integrals = self.FIRST_INTEGRALS # all of them
         
+        # first compute the gradients \nabla\beta_i 
+        fivag = [(i(self),i(self,initial_state=True),j(self)) for i,j in first_integrals]
+        finty,fint0,beta = [j for i,j,k in fivag],[i for i,j,k in fivag],[k for i,j,k in fivag]
+        beta_prime = [j[:] for j in beta] 
+        
+        # for each j, project all the i's out of the j surface
+        for j in range(len(fivag)):
+            for i in range(len(fivag)):
+                if j!= i:
+                    beta_i_prime = beta_prime[i] - np.dot(flat(beta[j]),flat(beta_prime[i])) / np.dot(flat(beta[j]),flat(beta_prime[j])) * beta_prime[j]
+                    beta_prime[i] = beta_i_prime 
+        # now project along each axis
+        for e0,ey,b_i_p,b_i in zip(fint0,finty,beta_prime,beta):
+            lambda_i = - (e0 - ey) / np.dot(flat(b_i_p),flat(b_i))
+            self.Y += lambda_i * b_i_p
+        return
     
     # %% DISPLAY
     def display_xy_projection(self):
@@ -290,26 +344,68 @@ class System:
         plt.xlabel("Time in steps of {}".format(System.H))
         plt.ylabel("Energy")
         
+        plt.tight_layout() 
         plt.show()
+        return
+    
+    # helper method, calculates anlge between two hypersurfaces given the nablas 
+    def angle_manifold(self,nabla_fint1,nabla_fint2):
+        nab1,nab2 = self.nabla_fint1(),self.nabla_fint2()
+        return math.arccos(abs(dot(nab1,nab2)) / (norm(nab1) * norm(nab2))) * 180 / math.pi
+    
+    
+    # helper method, plots angles between hypersurfaces 
+    def plot_invarient_level_set_angles(self,ls_names=["energy","ang x","ang y","ang z"]):
+        for i,j in itertools.combinations(ls_names,r=2):
+            if i!=j:
+                nab_i,nab_j = self.FIRST_INT_DIC[i][1] , self.FIRST_INT_DIC[j][1]
+                # calculate the angle between them
+                angleij = [self.angle_manifold(nab_i,nab_j)]
+                # plot the angle 
+                plt.plot(angleij,label="{} and {}".format(i,j),alpha=.5,linewidth=.5)
+        plt.legend()
+        plt.title("Angles between invarient level sets",fontsize=16)
+        plt.xlabel("Time in steps of {}".format(System.H))
+        plt.ylabel("Angle")
         
-    def display_invarients(self):
+    def display_invarients(self,ls_names=["energy","ang x","ang y","ang z"]):
         plt.subplots(2,2,figsize=(10,10))
         # energy
         plt.subplot(2,2,1)
+        plt.plot(self.energies)
+        plt.title("Net Energy of System",fontsize=16)
+        plt.xlabel("Time in steps of {}".format(System.H))
+        plt.ylabel("Energy")
         
         # angular momenta in x,y,z 
         plt.subplot(2,2,2)
+        lx,ly,lz = self.get_angular_momentum()
+        plt.plot(lx,label='x',alpha=.5)
+        plt.plot(ly,label='y',alpha=.5)
+        plt.plot(lz,labal='z',alpha=.5)
+        plt.title("Angular Momentum xyz",fontsize=16)
+        plt.xlabel("Time in steps of {}".format(System.H))
+        plt.ylabel("Angular Momentum")
         
         # linear momenta in x,y and z 
         plt.subplot(2,2,3)
+        px,py,pz = self.get_lin_mom_xyz()
+        plt.plot(px,label='x',alpha=.5)
+        plt.plot(py,label='y',alpha=.5)
+        plt.plot(pz,label='z',alpha=.5)
+        plt.title("Linear Momentum xyz",fontsize=16)
+        plt.xlabel("Time in steps of {}".format(System.H))
+        plt.ylabel("Linear Momentum")
         
         # angles between first integral level sets
         plt.subplot(2,2,4)
+        self.plot_invarient_level_set_angles(ls_names)
         
+        plt.tight_layout()
         plt.show()
         
     
-    # UTILITY 
+    # %% UTILITY 
     def cm_frame(Y,masses):
         # returns Y in the CM frame
         px,py,pz = Y.T[0],Y.T[1],Y.T[2]
@@ -408,15 +504,21 @@ class Planet:
     def display_xy_projection(self):
         x,y = np.array(self.trace).T[3:5]
         plt.plot(x,y,'-',label=self.name)
+        return
         
     def display_yz_projection(self):
         y,z = np.array(self.trace).T[4:]
         plt.plot(y,z,'-',label=self.name)
+        return
         
     def display_zx_projection(self): 
         x = np.array(self.trace).T[3] 
         z = np.array(self.trace).T[5] 
         plt.plot(z,x,'-',label=self.name) 
+        return
+        
+    def display_energy(self):
+        return
     
     # UTILITY METHODS 
         
@@ -440,8 +542,9 @@ if __name__=='__main__':
     # time evolve the system a bunch then display 2d projections of trajectories 
     for i in range(System.STEPS): 
         solar.stromer_verlet_timestep() 
-        solar.naive_projection(first_integrals=[(System.get_energy,System.get_nabla_H)])
-        solar.update_energies()
+        # solar.naive_projection(first_integrals=[(System.get_energy,System.get_nabla_H)])
+        solar.parallel_projection(first_integrals=[(System.get_energy,System.get_nabla_H)]) 
+        solar.update_energies() 
         solar.update_planets() 
         
     print("\nFinished integrating, now computing trace and invariants.") 

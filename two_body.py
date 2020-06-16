@@ -21,12 +21,12 @@ M1 = 1.0
 M2 = 1.4
 M = M1+M2
 M_REDUCED = M1*M1 / M
-Y0 = np.array([np.array([.4,0.1]),np.array([-.4,-0.1]),
+Y0 = np.array([np.array([0.4,0.0]),np.array([-0.4,-0.0]),
                np.array([0.,-1.0]),np.array([0.,1.0])])# cartesian (p1,p2,q1,q2)
 
 # EPSILON = 10.0 # see projection method # depricated 
 H = 0.05 # timestep 
-STEPS = 1000000
+STEPS = 100000
 ENERGY_0 = None # get_energy(Y0) 
 TOTAL_MOMENUM_0 = None # get_total_linear_momentum_abs(Y0) 
 TOTAL_ANG_MOMENTUM_0 = None # get_total_angular_momentum(Y0) 
@@ -510,56 +510,47 @@ def fourth_order_kutta(y):
 
 # %% PROJECTIONS
 
-# projects y onto the energy manifold
-def energy_projection(y):
-    nabla_h = nabla_H(y)
-    nabla_h_flat = np.ndarray.flatten(nabla_h)
-    lam = (ENERGY_0 - get_energy(y))/(np.dot(nabla_h_flat,nabla_h_flat))
-    y_twiddle = y + lam*nabla_h
-    return y_twiddle
-    
-    
+
 # naive should be same as other if manifold tanjent spaces are perpendicular 
 # this method can do with some optimization (/ refactoring) 
 def naive_projection(y,first_integrals=[(get_energy,nabla_H),
-                                               (get_total_angular_momentum,nabla_l)]):
+                                        (get_total_angular_momentum,nabla_l)]):
     y_proj=y[:]
     # apply each projection one after the other 
-    for i in first_integrals:
-        fint,nabla_fint = i[0],i[1](y_proj) 
+    for i,j in first_integrals:
+        fint,nabla_fint = i,j(y_proj) 
         lambda_i = fint(Y0) - fint(y_proj) 
         lambda_i /= supervec_norm(nabla_fint)
         y_proj = y_proj + lambda_i*nabla_fint 
         
-    return y_proj
+    return y_proj # since y is an array you could have written this so that you're directly operating on it, it's a pointer remember this stuff...
         
 # same as naive but does it in k steps (is also k times slower!), also it's only effective if 
 # there are multiple first integrals, no point if there is just one 
 def iterated_projection(y,k=5,first_integrals=[(get_energy,nabla_H)]):
     y_proj = y[:]
     # apply k times 
-    for j in range(k,0,-1):
+    for l in range(k,0,-1):
         # apply each projection one after the other 
-        for i in first_integrals: 
-            fint,nabla_fint = i[0],i[1](y_proj) 
+        for i,j in first_integrals: 
+            fint,nabla_fint = i,j(y_proj) 
             lambda_i = fint(Y0) - fint(y_proj) 
             lambda_i /= supervec_norm(nabla_fint) 
-            y_proj = y_proj + (lambda_i / j) * nabla_fint 
+            y_proj = y_proj + (lambda_i / l) * nabla_fint 
     
     return y_proj
 
 
 def parallel_projection(y,first_integrals=[(get_energy,nabla_H),
-                                                   (get_lin_mom_x,nabla_lin_x),
-                                                   (get_lin_mom_y,nabla_lin_y)]):
+                                                (get_lin_mom_x,nabla_lin_x),
+                                                (get_lin_mom_y,nabla_lin_y)]):
     global overflow_count
     
     # first compute the gradients
-    fivag = [(i[0](y),i[0](Y0),i[1](y)) for i in first_integrals]
-    finty,fint0,beta = [j[1] for j in fivag],[j[0] for j in fivag],[j[2] for j in fivag]
+    fivag = [(i(y),i(Y0),j(y)) for i,j in first_integrals]
+    finty,fint0,beta = [j for i,j,k in fivag],[i for i,j,k in fivag],[k for i,j,k in fivag]
     beta_prime = [j[:] for j in beta] # copy of the gradients to be modified
     
-    # just a check to make sure they all have same energy a
     
     # for each j, project all the i's out of the j surface
     for j in range(len(fivag)):
@@ -573,9 +564,9 @@ def parallel_projection(y,first_integrals=[(get_energy,nabla_H),
     
     y_proj = y[:] 
     # project along each axis
-    for e0,ey,b_i_p,b_i in zip(finty,fint0,beta_prime,beta):
+    for e0,ey,b_i_p,b_i in zip(fint0,finty,beta_prime,beta):
         try:
-            lambda_i = (e0 - ey) / supervec_dot(b_i_p,b_i)
+            lambda_i = -(e0 - ey) / supervec_dot(b_i_p,b_i)
             y_proj += lambda_i * b_i_p 
         except OverflowError("overflow in computing lambda_i"):
             overflow_count+=1
@@ -709,7 +700,7 @@ def display_compare_methods(data):
     
     # display linear momentum
     plt.subplot(223)
-    for times,momentums,name in zip(data['time'],data['lin_momentum'],data['name']):
+    for times,momentums,name in zip(data['time'],data['lin_momentum'],data['name']): 
         plt.plot(times,momentums,label=name,alpha=.6)
     plt.title('Linear Momenta : h={} , steps={}'.format(H,STEPS),fontsize=16)
     plt.ylabel('Linear Momentum')
@@ -718,7 +709,7 @@ def display_compare_methods(data):
     
     # display angular momentum
     plt.subplot(224)
-    for times,ang_momentums,name in zip(data['time'],data['ang_momentum'],data['name']):
+    for times,ang_momentums,name in zip(data['time'],data['ang_momentum'],data['name']): 
         plt.plot(times,ang_momentums,label=name,alpha=.75)
     plt.title('Angular Momenta : h={} , steps={}'.format(H,STEPS),fontsize=16)
     plt.ylabel('Angular Momentum')
@@ -761,43 +752,6 @@ def compare_methods(list_of_methods):
         
     return data
 
-def compare_energy_projection(method):
-    global time,energy_arr,linear_momentum_arr,ang_momentum_arr,position_arr,time_arr,radius_arr
-    data = {'name':[] , 'energy':[] , 'lin_momentum':[] , 'ang_momentum':[] ,
-            'position':[] , 'time':[] , 'radius':[]}
-    
-    # first without and then with projection
-    for boolian_var in (False,True):
-        y = Y0[:]
-        time=0
-        for i in range(STEPS):
-            y = method(y)
-            time+=H
-            if boolian_var==True: y = energy_projection(y)
-            update_dta(y)
-        
-        # save all the data in a big dictionary of arrays
-        if boolian_var==True:
-            data['name'].append(method.__name__+' With Energy Projection')
-        else: data['name'].append(method.__name__+' No Projection')
-        data['energy'].append(np.array(energy_arr[:]))
-        data['lin_momentum'].append(np.array(linear_momentum_arr[:]))
-        data['ang_momentum'].append(np.array(ang_momentum_arr[:]))
-        data['position'].append(np.array(position_arr[:]))
-        data['time'].append(np.array(time_arr[:]))
-        data['radius'].append(np.array(radius_arr[:]))
-        
-        # reset the global vairables for a new run 
-        energy_arr = []
-        linear_momentum_arr = []
-        ang_momentum_arr = []
-        position_arr = [] # [Y0[2:]]
-        time = 0
-        time_arr = []
-        radius_arr = []
-    
-    return data
-
 def display_relative_velocity():
     return
 
@@ -805,7 +759,7 @@ def display_relative_velocity():
 def define_starting_momentum(E,L,q1,q2,p1):
     global Y0
     # solve ang momentum for p21 and sub into energy eq 
-    a = np.linalg.norm()
+    # a = np.linalg.norm()
     return
         
 # %% INITIALIZE CONSTANTS THAT REQUIRE FUNCTIONS
@@ -884,7 +838,7 @@ if __name__ == "__main__":
     
     # method = fourth_order_kutta(y)
     # method = exp_euler(y)
-    # method = exp_trapezium(y)
+    # method = exp_trapezium(y) 
     # method = exp_midpoint(y)
     # method = syplectic_euler(y)
     # method = stromer_verlet
@@ -893,14 +847,12 @@ if __name__ == "__main__":
                    "Naive":naive_projection,
                    "Iterated":iterated_projection,
                    "Parallel":parallel_projection,
-                   "Standard":standard_projection}
-    projection_name = "Naive"
+                   "Standard":standard_projection} 
+    projection_name = "Naive" 
     projection = projections[projection_name]
     
     for i in range(STEPS):
         y = method(y)
-        
-        
         
         # projection step
         if projection!=None:
@@ -925,6 +877,6 @@ if __name__ == "__main__":
     display_relative(steps_sep=0.5,method_name = method.__name__,projection_type=projection_name)
     # display_total_energy() 
     display_invarients()
-    plt.savefig("./figures/gallary/invarients_config4_{}_{}_h={}_STEPS={}.png".format(method.__name__,projection_name,H,STEPS))
+    plt.savefig("./figures/gallary/invarients_configx_{}_{}_h={}_STEPS={}.png".format(method.__name__,projection_name,H,STEPS))
     plt.show()
     
