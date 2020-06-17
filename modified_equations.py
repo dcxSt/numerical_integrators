@@ -7,6 +7,7 @@ Created on Tue Jun 16 13:54:39 2020
 """
 # %% IMPORTS
 import numpy as np
+import itertools
 
 
 
@@ -50,7 +51,24 @@ def next_gamma(gamma):
         gamma_next = gamma_reduced # reduce gamma
     return gamma_next_simpl 
         
-            
+
+# we represent g^(n) by an array of strings
+# g^{(n)} = [[0,["f1n"]] , [1,["f2n"]] , [2,["f3n"]],...] means f^(n) + hf_2^(n) + h^3f_3^(n) + O(h^4)
+# the format foe each element is [power of h , [list of string representations of nth derivative of functions f_i(y tilde)]]
+def convolve(arrays):
+    convolved = arrays[0]
+    arrays = arrays[1:]
+    while arrays:
+        conv_step = itertools.product(convolved,arrays[0])
+        conv_next = []
+        for i,j in conv_step:
+            # add h order coefs and concatenate the lists
+            conv_next.append([i[0] + j[0] , i[1] + j[1]])
+        convolved = conv_next 
+        arrays = arrays[1:]
+    # put it in order so that it's human redable 
+    convolved.sort()
+    return convolved
         
         
     
@@ -67,10 +85,19 @@ def next_gamma(gamma):
 
 # %% TESTING THE ALGORITHMS
 
-if __name__=="__main__":
-    gamma = [[1,np.array([1])]]
-    gammas = [gamma]
-    for i in range(4):
-        gamma = next_gamma(gamma)
-        gammas.append(gamma)
-    [print(gamma,end="\n\n") for gamma in gammas] 
+# TEST convolve
+if __name__ == "__main__":
+    g1 = [[0,["a"]],[1,["b"]]]
+    g2 = [[0,["r"]],[2,["s"]]]
+    conv = convolve([g1,g2])
+    print(conv)
+
+
+# # TEST next_gamma
+# if __name__=="__main__":
+#     gamma = [[1,np.array([1])]]
+#     gammas = [gamma]
+#     for i in range(4):
+#         gamma = next_gamma(gamma)
+#         gammas.append(gamma)
+#     [print(gamma,end="\n\n") for gamma in gammas] 
