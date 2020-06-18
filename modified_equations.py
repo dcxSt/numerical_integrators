@@ -8,7 +8,8 @@ Created on Tue Jun 16 13:54:39 2020
 # %% IMPORTS
 import numpy as np
 import itertools
-
+from fractions import Fraction 
+from math import factorial
 
 
 # %%ALGORITHMS FOR FINDING MODIFIED EQUATIONS
@@ -111,15 +112,45 @@ def gamma_to_pihsr(gamma,o=5):
     return pihsr
     
 # takes a long term (written in terms of the f strings lists) and returns all order n terms
-# pihsr stands for polynomial in h string representation, it's the format
+# pihsr stands for polynomial in h string representation, it's the format we use here
 def get_order_n_terms(pihsr,n): 
     order_n_terms_pihsr = []
     for i,j in pihsr:
         if i==n:
             order_n_terms_pihsr.append([i,j])
     return order_n_terms_pihsr
-        
-# shows the polynomial in human form
+
+def sum_sort_lists(lists):
+    sum_lists = []
+    for i in lists: sum_lists += i
+    sum_lists.sort()
+    return sum_lists
+
+# new format, includes coefficients instead of everything just being coef 1 w/ repetitions
+def compress_pihsr(pihsr):
+    # old format, element = [power of h , [string reps of nth derivative of f_i]]
+    # new format, element = [coefficient fraction , power of h , [string reps of nth derivative of f_i]]
+    pihsr.sort()
+    new_format_pihsr = [[Fraction(1,1),j,k] for j,k in pihsr]
+    condensed_pihsr = [new_format_pihsr[0]]
+    new_format_pihsr = new_format_pihsr[1:]
+    while new_format_pihsr:
+        if new_format_pihsr[0][1:]==condensed_pihsr[-1][1:]:
+            condensed_pihsr[-1][0] += new_format_pihsr[0][0]
+        else:
+            condensed_pihsr.append(new_format_pihsr[0])
+        new_format_pihsr = new_format_pihsr[1:]
+    return condensed_pihsr
+
+# # simplify a comp_pihsr format
+# def simplify_pihsr(comp_pihsr):
+#     simplified_pihsr = [comp_pihsr[0]]
+#     comp_pihsr = compu_pihsr[1:]
+#     while comp_pihsr:
+#         # check to see if there is one in simplified pihsr already
+#         if 
+
+# shows the polynomial in human readable form
 def display_pihsr(pihsr):
     for i in range(max([i for i,j in pihsr])+1):
         print("\nh^{} x (".format(i),end="  ")
@@ -127,12 +158,40 @@ def display_pihsr(pihsr):
             mystring = ""
             for f in fk:
                 split = str.split(f,",")
-                mystring += "f_{}^{}".format(split[0][1:] , split[1])
+                mystring += "f_{}^({})".format(split[0][1:] , split[1])
                 mystring += " "
             print(mystring,end="  +  ")
         print(" )")
     # ignore the plus at the end, it's not worth our time
     return
+
+def display_compressed_pihsr(comp_pihsr):
+    for l in range(max([j for i,j,k in pihsr])+1):
+        print("\nh^{} x (".format(l),end="  ")
+        for coef,o,fk in [[i,j,k] for i,j,k in comp_pihsr if l==j]:
+            mystring = "[{}]".format(coef)
+            for f in fk:
+                split = str.split(f,",")
+                mystring += "f_{}^({})".format(split[0][1:] , split[1])
+                mystring += " "
+            print(mystring,end="  +  ")
+        print(" )")
+    return 
+    
+
+# returns taylor expansion of each coef in terms of {f_i}
+def expand_taylor_ytilde(n):
+    gamma = [[1,np.array([1])]]
+    everything_pihsr = []
+    for l in range(1,n+1):
+        comp_pihsr = compress_pihsr(gamma_to_pihsr(gamma,o=n-l)) 
+        # multiply coefs by h^l / l factorial 
+        comp_pihsr = [[i*Fraction(1,factorial(l)),j+l,k] for i,j,k in comp_pihsr]
+        # add it to everything pihsr
+        for i in comp_pihsr:
+            everything_pihsr.append(i) 
+        gamma = next_gamma(gamma)
+    return everything_pihsr
             
 
 # %% KEPLER
@@ -144,18 +203,23 @@ def display_pihsr(pihsr):
 
 
 
-# %% TESTING THE ALGORITHMS
+# %% TESTING ZONE
     
-# Test get_gn_str and gamma_to_pihsr
-if __name__=="__main__":
-    gamma = [[1,np.array([1])]]
-    for i in range(5):
-        gamma=next_gamma(gamma)
+# TEST expand_taylor_ytilde
+if __name__ == "__main__":
+    pihsr = expand_taylor_ytilde(3)
+    display_compressed_pihsr(pihsr)
     
-    pihsr = gamma_to_pihsr(gamma,o=3)
-    # print("gamma : ",gamma)
-    # print("pihsr : ",pihsr)
-    display_pihsr(pihsr) 
+
+# # TEST gamma_to_pihsr
+# if __name__=="__main__":
+#     gamma = [[1,np.array([1])]]
+#     for i in range(3):
+#         gamma=next_gamma(gamma)
+#     pihsr = gamma_to_pihsr(gamma,o=3)
+#     # print("gamma : ",gamma)
+#     print("pihsr : ",pihsr)
+#     # display_pihsr(pihsr) 
 
 # # TEST convolve
 # if __name__ == "__main__":
