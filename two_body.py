@@ -21,10 +21,10 @@ M1 = 1.0
 M2 = 1.4
 M = M1+M2
 M_REDUCED = M1*M1 / M
+ETA = -G*M1*M2 
 Y0 = np.array([np.array([0.4,0.0]),np.array([-0.4,-0.0]),
                np.array([0.,-1.0]),np.array([0.,1.0])])# cartesian (p1,p2,q1,q2)
 
-# EPSILON = 10.0 # see projection method # depricated 
 H = 0.05 # timestep 
 STEPS = 100000
 ENERGY_0 = None # get_energy(Y0) 
@@ -160,6 +160,26 @@ def nabla_H(y):
     nabla_h.append(r*G*M1*M2*(rabs**(-3)))
     nabla_h.append(-r*G*M1*M2*(rabs**(-3)))
     return np.array(nabla_h)
+
+# returns the hessian matrix of the hamiltonian at y
+def hessian_H(y):
+    # see section 3.1 kepler problem in report write-up
+    # compute xi1 and xi2
+    xi = math.sqrt(np.dot(y[2]-y[3],y[2]-y[3]))
+    xito3 = xi**3
+    xito5 = xi**5
+    xi1 = y[3][0] - y[2][0]
+    xi2 = y[3][1] - y[2][1]
+    # we define each column manually (also symmetric so columns = rows), it's only eight by eight
+    col1 = (1/M1,0,0,0,0,0,0,0)
+    col2 = (0,1/M1,0,0,0,0,0,0)
+    col3 = (0,0,1/M2,0,0,0,0,0)
+    col4 = (0,0,0,1/M2,0,0,0,0)
+    col5 = (0,0,0,0, -ETA/xito3 + ETA/xito5*xi1**2 , ETA/xito5*xi1*xi2 , ETA/xito3 - ETA/xito5*xi1**2 , -ETA/xito5*xi1*xi2)
+    col6 = (0,0,0,0, ETA/xito5*xi1*xi2 , -ETA/xito3 + ETA/xito5*xi2**2 , -ETA/xito5*xi1*xi2 , ETA/xito3 - ETA/xito5*xi2**2)
+    col7 = (0,0,0,0, ETA/xito3 - ETA/xito5*xi1**2 , -ETA/xito5*xi1*xi2 , -ETA/xito3 + ETA/xito5*xi1**2 , ETA/xito5*xi1*xi2)
+    col8 = (0,0,0,0, -ETA/xito5*xi1*xi2 , ETA/xito3 - ETA/xito5*xi2**2 , ETA/xito5*xi1*xi2 , -ETA/xito3 + ETA/xito5*xi2**2)
+    return np.array((col1,col2,col3,col4,col5,col6,col7,col8))
     
 # takes the gradient of hamiltonian only wrt q1 and q2
 def nabla_q(q):
@@ -190,6 +210,8 @@ def nabla_lin_x(y):
 # gradient of the total linear momentum in the y direction
 def nabla_lin_y(y):
     return np.array([np.array([0,1]),np.array([0,1]),np.array([0,0]),np.array([0,0])])
+
+
 
 
 # %% FIRST INTEGRALS
@@ -573,53 +595,6 @@ def parallel_projection(y,first_integrals=[(get_energy,nabla_H),
             
     return y_proj
 
-
-# General first integral projection 
-# takes list of tuples (first integral , gradient function)
-# MATH HERE IS A LITTLE FAULTY, NEEDS REEVALUATING, IN LATEX TOO
-### DEPRICATED
-# def first_integral_projection(y,first_integrals=[(get_energy,nabla_H),
-#                                                (get_total_angular_momentum,nabla_l)]):
-#     # first compute the gradients 
-#     fivag = [(i[0](y),i[1](y)) for i in first_integrals] # first integral values and gradients
-    
-#     # keep track of overflow errors 
-#     global overflow_count
-    
-#     # next compute the adjusted gradients for each of them 
-#     nabla_primes = []
-#     for i in range(len(fivag)):
-#         nabla_i_prime = fivag[i][1]
-#         for j in range(len(fivag)):
-#             if i!=j:
-#                 nabla_j = fivag[j][1]
-#                 try:
-#                     difference = supervec_dot(nabla_i_prime,nabla_j) / supervec_dot(nabla_j,nabla_j) * nabla_j
-#                     nabla_i_prime -= difference
-#                 except OverflowError:
-#                     print('Overflow error in computing nabla_i_prime at step {}'.format(len(time_arr)))
-#                     overflow_count+=1
-
-#         nabla_primes.append(nabla_i_prime)
-    
-#     # now compute the values lambda_i'
-#     lambda_primes = [] 
-#     for i in range(len(nabla_primes)):
-#         try:
-#             numerator = first_integrals[i][0](Y0) - fivag[i][0]
-#             # to ensure there is no blow up we add an epsilon term to the denominator 
-#             denominator = np.abs(supervec_dot(nabla_primes[i],fivag[i][1])) + EPSILON*np.abs(numerator)
-#             lambda_i_prime = numerator / denominator
-#         except:
-#             print('Overflow error in computing lambda_i_prime at step {}, setting lambda_i_prime to zer0'.format(len(time_arr)))
-#             overflow_count+=1 
-#             lambda_i_prime = 0 
-        
-#         lambda_primes.append(lambda_i_prime)
-        
-#     # now project 
-#     y_projected  = y + sum([i*j for i,j in zip(lambda_primes,nabla_primes)])
-#     return y_projected
 
 def standard_projection(y,k=2,first_integrals=[(get_energy,nabla_H),
                                                              (get_total_angular_momentum,nabla_l)]):

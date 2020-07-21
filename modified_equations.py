@@ -167,6 +167,7 @@ def display_pihsr(pihsr):
 
 def display_compressed_pihsr(comp_pihsr):
     for l in range(max([j for i,j,k in pihsr])+1):
+        count=0
         print("\nh^{} x (".format(l),end="  ")
         for coef,o,fk in [[i,j,k] for i,j,k in comp_pihsr if l==j]:
             mystring = "[{}]".format(coef)
@@ -174,7 +175,13 @@ def display_compressed_pihsr(comp_pihsr):
                 split = str.split(f,",")
                 mystring += "f_{}^({})".format(split[0][1:] , split[1])
                 mystring += " "
-            print(mystring,end="  +  ")
+            count+=1
+            if count%9==0:
+                print(mystring,end="\n\n\t+  ")
+            elif count%3==0:
+                print(mystring,end="\n\t+  ")
+            else:
+                print(mystring,end="  +  ")
         print(" )")
     return 
     
@@ -204,11 +211,12 @@ def expand_taylor_ytilde(n):
 
 
 # %% TESTING ZONE
+
     
 # TEST expand_taylor_ytilde
 if __name__ == "__main__":
-    pihsr = expand_taylor_ytilde(3)
-    display_compressed_pihsr(pihsr)
+    pihsr = expand_taylor_ytilde(6)
+    display_compressed_pihsr(pihsr) 
     
 
 # # TEST gamma_to_pihsr
