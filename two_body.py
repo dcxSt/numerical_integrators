@@ -25,8 +25,8 @@ ETA = -G*M1*M2
 Y0 = np.array([np.array([0.4,0.0]),np.array([-0.4,-0.0]),
                np.array([0.,-1.0]),np.array([0.,1.0])])# cartesian (p1,p2,q1,q2)
 
-H = 0.05 # timestep 
-STEPS = 100000
+H = 0.0001 # timestep 
+STEPS = 50000
 ENERGY_0 = None # get_energy(Y0) 
 TOTAL_MOMENUM_0 = None # get_total_linear_momentum_abs(Y0) 
 TOTAL_ANG_MOMENTUM_0 = None # get_total_angular_momentum(Y0) 
@@ -161,6 +161,7 @@ def nabla_H(y):
     nabla_h.append(-r*G*M1*M2*(rabs**(-3)))
     return np.array(nabla_h)
 
+
 # returns the hessian matrix of the hamiltonian at y
 def hessian_H(y):
     # see section 3.1 kepler problem in report write-up
@@ -181,6 +182,34 @@ def hessian_H(y):
     col8 = (0,0,0,0, -ETA/xito5*xi1*xi2 , ETA/xito3 - ETA/xito5*xi2**2 , ETA/xito5*xi1*xi2 , -ETA/xito3 + ETA/xito5*xi2**2)
     return np.array((col1,col2,col3,col4,col5,col6,col7,col8))
     
+# returns 4x4 matrix, lower right hand block of hessian
+def partial_Hqq(y):
+    # see section 3.1 kepler problem in report write-up
+    # compute xi1 and xi2
+    xi = math.sqrt(np.dot(y[2]-y[3],y[2]-y[3]))
+    xito3 = xi**3
+    xito5 = xi**5
+    xi1 = y[3][0] - y[2][0]
+    xi2 = y[3][1] - y[2][1]
+    # we define each column manually (also symmetric so columns = rows), it's only four by four
+    col1 = (-ETA/xito3 + ETA/xito5*xi1**2 , ETA/xito5*xi1*xi2 , ETA/xito3 - ETA/xito5*xi1**2 , -ETA/xito5*xi1*xi2)
+    col2 = (ETA/xito5*xi1*xi2 , -ETA/xito3 + ETA/xito5*xi2**2 , -ETA/xito5*xi1*xi2 , ETA/xito3 - ETA/xito5*xi2**2)
+    col3 = (ETA/xito3 - ETA/xito5*xi1**2 , -ETA/xito5*xi1*xi2 , -ETA/xito3 + ETA/xito5*xi1**2 , ETA/xito5*xi1*xi2)
+    col4 = (-ETA/xito5*xi1*xi2 , ETA/xito3 - ETA/xito5*xi2**2 , ETA/xito5*xi1*xi2 , -ETA/xito3 + ETA/xito5*xi2**2)
+    return np.array((col1,col2,col3,col4))
+
+# returns 4x4 matrix, upper right hand block of hessian
+def partial_Hpp(y):
+    col1 = (1/M1,0,0,0) 
+    col2 = (0,1/M1,0,0) 
+    col3 = (0,0,1/M2,0) 
+    col4 = (0,0,0,1/M2) 
+    return np.array((col1,col2,col3,col4)) 
+
+# returns 4x4x4 tensor
+def partial_Hqqq(y):
+    return
+
 # takes the gradient of hamiltonian only wrt q1 and q2
 def nabla_q(q):
     # assume 2bp
@@ -457,7 +486,7 @@ def display_invarients():
     plt.tight_layout() 
     
 
-# %% NUMERICAL FLOW FUNCTIONS
+# %% BASIC NUMERICAL FLOW FUNCTIONS
     
 # advances solution forward one timestep using the explicit euler method
 def exp_euler(y):
@@ -466,13 +495,15 @@ def exp_euler(y):
     y_next = y + H*grady 
     return y_next 
 
-def exp_euler_modified_energy(y):
+# the gradient is modified so that the energy manifold is an attractor
+def exp_euler_modified_energy_attractor(y):
     grady_mod = modified_gradient_energy_attractor(y)
     y_next = y + H*grady_mod
     return y_next
 
-def exp_euler_modified_energy_ang(y):
-    grady_mod = modified_gradient_en_ang_attractor(y)
+# the gradient is modified so that the energy and angular momentum manifolds are attractors
+def exp_euler_modified_energy_ang_attractor(y):
+    grady_mod = modified_gradient_en_ang_attractor(y) 
     y_next = y + H*grady_mod
     return y_next 
 
@@ -529,6 +560,32 @@ def fourth_order_kutta(y):
     k4 = gradient(y + H*k3)
     y_next = y + H/6*(k1 + 2*k2 + 2*k3 + k4)
     return y_next 
+
+# %% EXPLICIT EULER (SMALL STEP) NUMERICAL FLOW FUNCTIONS FOR MODIFIED EQUATIONS
+# the equations are modified: the standard as well as projection terms added
+    
+def exp_euler_modified_basic_order2(y,h=0.01):
+    # h should be about 1 or 2 orders of magnitude bigger than H
+    # just returns the point, times H times the modified gradient 
+    f = gradient(y)
+    nab = nabla_H(y).flatten() #p11,p12,p21,p22,q11,q12,q21,q22 
+    ham_p,ham_q = nab[:4],nab[4:] 
+    ham_pp,ham_qq = partial_Hpp(y),partial_Hqq(y) 
+    # construct the second order term and reformat it so that it's in the stupid format
+    f2 = 0.5 * np.concatenate([ham_qq @ ham_p , ham_pp @ ham_q])
+    f2 = np.array((f2[0:2],f2[2:4],f2[4:6],f2[6:]))
+    
+    y_next = y + H*( f + h*f2 ) 
+    return y_next
+
+def exp_euler_modified_energy_proj_order2(y,h=0.01):
+    return
+
+def exp_euler_modified_ang_proj_order2(y,h=0.01):
+    return
+
+def exp_euler_modified_energy_ang_proj_order2(y,h=0.01):
+    return
 
 # %% PROJECTIONS
 
@@ -597,7 +654,7 @@ def parallel_projection(y,first_integrals=[(get_energy,nabla_H),
 
 
 def standard_projection(y,k=2,first_integrals=[(get_energy,nabla_H),
-                                                             (get_total_angular_momentum,nabla_l)]):
+                                               (get_total_angular_momentum,nabla_l)]):
     # define g and g', g : \R^n \to \R^m 
     def g(y):
         g = []
@@ -811,19 +868,20 @@ if __name__ == "__main__":
     # Y0 = parallel_projection(Y0,first_integrals=[(get_lin_mom_x,nabla_lin_x),
     #                                              (get_lin_mom_y,nabla_lin_y)])
     
-    # method = fourth_order_kutta(y)
-    # method = exp_euler(y)
-    # method = exp_trapezium(y) 
-    # method = exp_midpoint(y)
-    # method = syplectic_euler(y)
+    # method = fourth_order_kutta
+    # method = exp_euler
+    # method = exp_trapezium
+    # method = exp_midpoint
+    # method = syplectic_euler
     # method = stromer_verlet
-    method = stromer_verlet
+    # method = exp_euler_modified_basic_order2
+    method = exp_euler_modified_basic_order2
     projections = {"None":None,
                    "Naive":naive_projection,
                    "Iterated":iterated_projection,
                    "Parallel":parallel_projection,
                    "Standard":standard_projection} 
-    projection_name = "Naive" 
+    projection_name = "None" 
     projection = projections[projection_name]
     
     for i in range(STEPS):
