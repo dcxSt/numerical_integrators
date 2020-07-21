@@ -3,6 +3,9 @@
 ### outline of project
 
 ## Documentation
+### Kepler
+the files that have to do with the kepler program are the ones prefixed by 'kep_', these contain code that has to do with the two body problem in two d.
+
 ### modified_equations.py
 
 ##### format of pishr
