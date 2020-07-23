@@ -11,7 +11,7 @@ import statement for ease of access
 import numpy as np
 from kep_util_globvar import M1,M2,H,J
 from kep_derivative_functions import nabla_q,nabla_H
-from kep_derivative_functions import partial_Hpp,partial_Hqq,hessian_H
+from kep_derivative_functions import partial_Hpp,partial_Hqq,hessian_H,hessian_l
 from kep_derivative_functions import gradient,modified_gradient_en_ang_attractor,modified_gradient_energy_attractor
 
 
@@ -92,7 +92,7 @@ def fourth_order_kutta(y):
     return y_next 
 
 
-# %% PROJECITION TERMS FOR MODIFIED EQUATIONS
+# %% UTILITY FUNCTIONS FOR MODIFIED EQ INTEGRATORS
 
 # returns the scalar lambda_2 as defined in subsection 'Modified Equations for Numerical Flow of projection methods'
 # in section 'Backward Error Analysis' (5) of the report
@@ -109,6 +109,21 @@ def lambda2(y,J,hessian_beta,nabla_beta,nabla_hamil,d2):
 def lambda3(y,J,threetensor_beta,hessian_beta,nabla_hamil,nabla_beta,d3,d2):
     return
 
+# returns term in the equation that comes from energy projection
+def get_o2_projection_term_energy(y,d2):
+    lam2 = lambda2(y,J,hessian_beta = hessian_H,
+                   nabla_beta = nabla_H, nabla_hamil = nabla_H,
+                   d2 = d2) 
+    return -nabla_H(y).flatten() * lam2 
+    
+# returns term in the equation that comes from angular momentum projection 
+def get_o2_projection_term_ang_mom(y,d2):
+    lam2 = lambda2(y,J,hessian_beta = hessian_l,
+                   nabla_beta = nabla_l, nabla_hamil = nabla_H,
+                   d2 = d2)
+    return -nabla_l(y).flatten() * lam2 
+
+
 # %% NUMERICAL FLOW FUNCTIONS
 # helper function computes second term of numerical flow
 def d2_exp_euler(y):
@@ -120,16 +135,59 @@ def d3_exp_euler(y):
 
 # NOT YET WRITTEN
 def d2_stromer_verlet(y):
-    return
+    return - 0.5 * np.concatenate([ham_qq @ ham_p , ham_pp @ ham_q])
 
 def d3_stromer_verlet(y):
     return
 
+# %% MODIFIED GRAIENT FUNCTIONS
+def mod_flow_o2_no_proj(y,d2,h,flattened=True):
+    f = gradient(y)
+    nab_H = nabla_H(y).flatten() #p11,p12,p21,p22,q11,q12,q21,q22 
+    ham_p,ham_q = nab_H[:4],nab_H[4:] 
+    ham_pp,ham_qq = partial_Hpp(y),partial_Hqq(y) 
+    # construct the second order term
+    f2 = 0.5 * np.concatenate([ham_qq @ ham_p , ham_pp @ ham_q]) + d2(y).flatten()
+    if flattened==True:
+        return f + h*f2 # (warning, no reformatting here, still flat)
+    m1 = f + h*f2 
+    return np.array((m1[0:2],m1[2:4],m1[4:6],m1[6:])) 
+
+def mod_flow_o2_energy_proj(y,d2,h):
+    m1 = mod_flow_o2_no_proj(y,d2,h)
+    proj_term = get_o2_projection_term_energy(y,d2) # add the energy projection term 
+    m2 = m1 + h*proj_term 
+    m2 = np.array((m2[0:2],m2[2:4],m2[4:6],m2[6:]))
+    return m2
+
+def mod_flow_o2_ang_proj(y,d2,h):
+    m1 = mod_flow_o2_no_proj(y,d2,h)
+    proj_term = get_o2_projection_term_ang_mom(y,d2)
+    m2 = m1 + h*proj_term
+    m2 = np.array((m2[0:2],m2[2:4],m2[4:6],m2[6:]))
+    return m2
+
+def mod_flow_o2_energy_and_ang_proj(y,d2,h):
+    m1 = mod_flow_o2_no_proj(y,d2,h)
+    proj_term_energy = get_o2_projection_term_energy(y,d2)
+    proj_term_ang_mom = get_o2_projection_term_ang_mom(y,d2)
+    m2 = m1 + h*(proj_term_energy + proj_term_ang_mom)
+    m2 = np.array((m2[0:2],m2[2:4],m2[4:6],m2[6:]))
+    return m2
+
 # %% EXPLICIT EULER (SMALL STEP) NUMERICAL FLOW FUNCTIONS FOR MODIFIED EQUATIONS
 # the equations are modified: the standard as well as projection terms added
-    
+
+def fourth_order_kutta_modified_flow(y,d2=d2_exp_euler,h=0.01,flow=mod_flow_o2_no_proj):
+    k1 = flow(y)
+    k2 = flow(y + 0.5*H*k1) 
+    k3 = flow(y + 0.5*H*k2)
+    k4 = flow(y + H*k3) 
+    y_next = y + H/6*(k1 + 2*k2 + 2*k3 + k4)
+    return y_next
+
 def slow_modified_flow_basic_order2_no_proj(y,d2=d2_exp_euler,h=0.01):
-    # h should be about 1 or 2 orders of magnitude bigger than H
+    # h should be roughly 1 or 2 orders of magnitude bigger thagradientn H
     # just returns the point, times H times the modified gradient 
     f = gradient(y)
     nab_H = nabla_H(y).flatten() #p11,p12,p21,p22,q11,q12,q21,q22 
@@ -151,10 +209,9 @@ def modified_energy_proj_order2(y,d2=d2_exp_euler,h=0.01):
     ham_p,ham_q = nab_H[:4],nab_H[4:]
     ham_pp,ham_qq = partial_Hpp(y),partial_Hqq(y)
     # construct second order term f_2 with the projection term
-    f2 = 0.5 * np.concatenate([ham_qq @ ham_p , ham_pp @ ham_q]) + d2(y).flatten()
-    f2 -= nabla_H(y).flatten() * lambda2(y,J,hessian_beta = hessian_H,
-                  nabla_beta = nabla_H, nabla_hamil = nabla_H,
-                  d2 = d2) 
+    f2 = 0.5 * np.concatenate([ham_qq @ ham_p , ham_pp @ ham_q]) + d2(y).flatten() # modified eq term
+    
+    f2 += get_o2_projection_term_energy(y,d2) # add the energy projection term 
     
     # format it correctly
     f2 = np.array((f2[0:2],f2[2:4],f2[4:6],f2[6:]))
