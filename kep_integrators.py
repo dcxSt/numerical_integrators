@@ -10,7 +10,7 @@ import statement for ease of access
 
 import numpy as np
 from kep_util_globvar import M1,M2,H,J
-from kep_derivative_functions import nabla_q,nabla_H
+from kep_derivative_functions import nabla_q,nabla_H,nabla_l
 from kep_derivative_functions import partial_Hpp,partial_Hqq,hessian_H,hessian_l
 from kep_derivative_functions import gradient,modified_gradient_en_ang_attractor,modified_gradient_energy_attractor
 
@@ -135,6 +135,9 @@ def d3_exp_euler(y):
 
 # NOT YET WRITTEN
 def d2_stromer_verlet(y):
+    nab_H = nabla_H(y).flatten() #p11,p12,p21,p22,q11,q12,q21,q22 
+    ham_p,ham_q = nab_H[:4],nab_H[4:] 
+    ham_pp,ham_qq = partial_Hpp(y),partial_Hqq(y)
     return - 0.5 * np.concatenate([ham_qq @ ham_p , ham_pp @ ham_q])
 
 def d3_stromer_verlet(y):
