@@ -1,0 +1,76 @@
+
+% crucial imports
+\usepackage[margin=0.8in]{geometry}
+\usepackage{amsmath,amsthm,amssymb,amsfonts,tikz,tikzsymbols}
+\usepackage[shortlabels]{enumitem}
+
+% other important
+\usepackage{float}% for making figures behave with H
+\usepackage{listings}% code
+\usepackage[symbol]{footmisc}% for footnotes
+\usepackage{hyperref}
+\usepackage{MnSymbol}
+\hypersetup{
+  colorlinks   = true,    % Colours links instead of ugly boxes
+  urlcolor     = blue,    % Colour for external hyperlinks
+  linkcolor    = blue,    % Colour of internal links
+  citecolor    = red      % Colour of citations
+}
+
+% coding imports
+
+\usepackage{listings}
+\usepackage{pythonhighlight} % \begin{python} for eng, and for inline use \pyth{def inline_code()}
+
+% math imports 
+\usepackage{mathtools}
+\usepackage{amssymb} 
+\usepackage{amsmath}
+\usepackage{physics}
+\usepackage{esint}
+\usepackage[makeroom]{cancel}
+\usepackage{arydshln}
+
+\newcommand*{\rom}[1]{\expandafter\@slowromancap\romannumeral #1@} % for roman numerals
+
+% math commands
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\Q}{\mathbb{Q}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\C}{\mathbb{C}}
+\newcommand{\F}{\mathbb{F}}
+\newcommand{\M}{\mathbb{M}}
+
+\newcommand\defeq{\stackrel{\mathclap{\normalfont\mbox{\footnotesize{def}}}}{=}}
+\newcommand{\RA}{\Rightarrow}
+\newcommand{\LRA}{\Leftrightarrow}
+\newcommand{\LA}{\Leftarrow}
+\newcommand{\bijec}{\hookrightarrow \hspace{-9pt} \rightarrow} % badass bijection sign
+\renewcommand{\defeq}{\overset{\mathrm{def}}{=\joinrel=}}
+\newcommand{\longeq}{=\joinrel=} % long equals sign
+\newcommand{\longlongeq}{=\joinrel=\joinrel=}
+\newcommand{\suchthat}{\text{ s.t. }}
+\renewcommand{\L}{\mathcal L}
+\newcommand{\lag}{\mathcal L(q,\dot q)}
+
+% \renewcommand{\span}{\text{Span}} % don't know what the og \span was and I don't care
+\newcommand{\Ima}{\text{Im}}
+\newcommand{\Ker}{\text{Ker}}
+\newcommand{\Sym}{\text{Sym}}
+\newcommand{\unit}{1\!\!1}
+\def\acts{\curvearrowright} % group action
+% \newcommand\defeq{\mathrel{\stackrel{\makebox[0pt]{\mbox{\normalfont\tiny def}}}{=}}}
+
+% formatting commands
+
+\newcommand{\tbf}{\textbf}
+\newcommand{\mbf}{\mathbf}
+
+
+% \renewcommand\qedsymbol{$\Smiley$}% marcel's smily qed symbol
+
+
+% Resources for looking up how to do stuff:
+% Binary operators: http://www.access2science.com/latex/Binary.html
+% General help: http://en.wikibooks.org/wiki/LaTeX/Mathematics

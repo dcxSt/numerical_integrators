@@ -1,0 +1,105 @@
+\BOOKMARK [1][-]{section.1}{Motivation and Plan}{}% 1
+\BOOKMARK [1][-]{section.2}{Lie Symmetries for Solving DEs}{}% 2
+\BOOKMARK [2][-]{subsection.2.1}{Preliminaries.}{section.2}% 3
+\BOOKMARK [2][-]{subsection.2.2}{Lie Groups and Algebras.}{section.2}% 4
+\BOOKMARK [2][-]{subsection.2.3}{Canonical Coordinates}{section.2}% 5
+\BOOKMARK [2][-]{subsection.2.4}{Finding symmetries, the linearised symmetry condition.}{section.2}% 6
+\BOOKMARK [2][-]{subsection.2.5}{Noether's Theorem}{section.2}% 7
+\BOOKMARK [3][-]{subsubsection.2.5.1}{A basic example of Noether's theorem applied to a Lagrangian system}{subsection.2.5}% 8
+\BOOKMARK [1][-]{section.3}{Celestial mechanics, the N-Body problem.}{}% 9
+\BOOKMARK [2][-]{subsection.3.1}{The Kepler Problem}{section.3}% 10
+\BOOKMARK [2][-]{subsection.3.2}{Three bodies.}{section.3}% 11
+\BOOKMARK [2][-]{subsection.3.3}{N bodies.}{section.3}% 12
+\BOOKMARK [3][-]{subsubsection.3.3.1}{Symmetries of the n-body problem.}{subsection.3.3}% 13
+\BOOKMARK [1][-]{section.4}{Numerical Integration, Theory}{}% 14
+\BOOKMARK [2][-]{subsection.4.1}{Symplectic Manifolds and Symplectic Transformations}{section.4}% 15
+\BOOKMARK [2][-]{subsection.4.2}{Lagrangian systems \040Hamiltonian systems.}{section.4}% 16
+\BOOKMARK [2][-]{subsection.4.3}{Hamiltonian systems and Symplecticity.}{section.4}% 17
+\BOOKMARK [2][-]{subsection.4.4}{Symplectic Geometry}{section.4}% 18
+\BOOKMARK [2][-]{subsection.4.5}{Survey of Classical Integration methods}{section.4}% 19
+\BOOKMARK [3][-]{subsubsection.4.5.1}{Types of integrators}{subsection.4.5}% 20
+\BOOKMARK [3][-]{subsubsection.4.5.2}{Explicit Euler}{subsection.4.5}% 21
+\BOOKMARK [3][-]{subsubsection.4.5.3}{Str\366mer Verlet}{subsection.4.5}% 22
+\BOOKMARK [3][-]{subsubsection.4.5.4}{Explicit Midpoint rule}{subsection.4.5}% 23
+\BOOKMARK [2][-]{subsection.4.6}{Projection Methods}{section.4}% 24
+\BOOKMARK [3][-]{subsubsection.4.6.1}{First method. The Naive Projection Method}{subsection.4.6}% 25
+\BOOKMARK [3][-]{subsubsection.4.6.2}{Naive Symmetric Method.}{subsection.4.6}% 26
+\BOOKMARK [3][-]{subsubsection.4.6.3}{Better algorithm for projection methods of first integrals. The Parallel projection method.}{subsection.4.6}% 27
+\BOOKMARK [3][-]{subsubsection.4.6.4}{Standard Projection Method}{subsection.4.6}% 28
+\BOOKMARK [3][-]{subsubsection.4.6.5}{Modified differential equation, turn the manifold into an attractor?? by modifying the equation.}{subsection.4.6}% 29
+\BOOKMARK [3][-]{subsubsection.4.6.6}{Infidelity of the projections, `difference flow' \(made up term\).}{subsection.4.6}% 30
+\BOOKMARK [2][-]{subsection.4.7}{Second order Conservation of invariants via method of Local coordinates.}{section.4}% 31
+\BOOKMARK [3][-]{subsubsection.4.7.1}{Implementation of projection Algorithm. \(See documentation on site, link to github repo readme / documentation\)}{subsection.4.7}% 32
+\BOOKMARK [1][-]{section.5}{Backward Error Analysis}{}% 33
+\BOOKMARK [2][-]{subsection.5.1}{Algorithm for finding modified equation coefficients.}{section.5}% 34
+\BOOKMARK [2][-]{subsection.5.2}{Truncated modified equations for integrators}{section.5}% 35
+\BOOKMARK [3][-]{subsubsection.5.2.1}{Explicit Euler}{subsection.5.2}% 36
+\BOOKMARK [3][-]{subsubsection.5.2.2}{Str\366mer Verlet}{subsection.5.2}% 37
+\BOOKMARK [3][-]{subsubsection.5.2.3}{Modified equations for the Numerical flow of Projection methods}{subsection.5.2}% 38
+\BOOKMARK [3][-]{subsubsection.5.2.4}{Calculations of projection terms.}{subsection.5.2}% 39
+\BOOKMARK [1][-]{section.6}{Chaos, the Lyapunov spectrum and do the projection methods give rise to an attractor?}{}% 40
+\BOOKMARK [2][-]{subsection.6.1}{Lyapunov Exponents}{section.6}% 41
+\BOOKMARK [3][-]{subsubsection.6.1.1}{Gramm Schmidt decomposition : Algorithm for finding Lyapunov exponents 1}{subsection.6.1}% 42
+\BOOKMARK [3][-]{subsubsection.6.1.2}{Housolder Reflections : Algorithm for finding Lyapunov exponnents 2}{subsection.6.1}% 43
+\BOOKMARK [2][-]{subsection.6.2}{Calculating Lyapunov exponents for symplectic integrators.}{section.6}% 44
+\BOOKMARK [2][-]{subsection.6.3}{Implementation of modified equations for the Kepler problem.}{section.6}% 45
+\BOOKMARK [3][-]{subsubsection.6.3.1}{Implementing the modified equation integrator for the Explicit Euler method \(no projection\)}{subsection.6.3}% 46
+\BOOKMARK [3][-]{subsubsection.6.3.2}{Implementing the modified equation integrator for the Str\366mer Verlet method}{subsection.6.3}% 47
+\BOOKMARK [3][-]{subsubsection.6.3.3}{Implementing the modified equation for Explicit Euler integrator with projection}{subsection.6.3}% 48
+\BOOKMARK [3][-]{subsubsection.6.3.4}{Implementing the modified equation for Str\366mer Verlet integrator with projection}{subsection.6.3}% 49
+\BOOKMARK [3][-]{subsubsection.6.3.5}{Implementing exaggerated modified equations}{subsection.6.3}% 50
+\BOOKMARK [1][-]{section.7}{Experiments}{}% 51
+\BOOKMARK [2][-]{subsection.7.1}{Kepler Projection Methods Experiment.}{section.7}% 52
+\BOOKMARK [3][-]{subsubsection.7.1.1}{Aim}{subsection.7.1}% 53
+\BOOKMARK [3][-]{subsubsection.7.1.2}{Theory / Hypothesis}{subsection.7.1}% 54
+\BOOKMARK [3][-]{subsubsection.7.1.3}{Method}{subsection.7.1}% 55
+\BOOKMARK [3][-]{subsubsection.7.1.4}{Results, Observations, Remarks, Speculation.}{subsection.7.1}% 56
+\BOOKMARK [2][-]{subsection.7.2}{Remarks}{section.7}% 57
+\BOOKMARK [3][-]{subsubsection.7.2.1}{Exp Euler}{subsection.7.2}% 58
+\BOOKMARK [3][-]{subsubsection.7.2.2}{Str\366mer Verlet}{subsection.7.2}% 59
+\BOOKMARK [1][-]{section.8}{Meeting prep}{}% 60
+\BOOKMARK [2][-]{subsection.8.1}{Meeting prep Thursday 16 July}{section.8}% 61
+\BOOKMARK [3][-]{subsubsection.8.1.1}{Review of week}{subsection.8.1}% 62
+\BOOKMARK [3][-]{subsubsection.8.1.2}{Questions}{subsection.8.1}% 63
+\BOOKMARK [3][-]{subsubsection.8.1.3}{Plan for next week}{subsection.8.1}% 64
+\BOOKMARK [2][-]{subsection.8.2}{Meeting prep Thursday 18 June}{section.8}% 65
+\BOOKMARK [3][-]{subsubsection.8.2.1}{Review of week}{subsection.8.2}% 66
+\BOOKMARK [3][-]{subsubsection.8.2.2}{Questions}{subsection.8.2}% 67
+\BOOKMARK [3][-]{subsubsection.8.2.3}{Plan for next week}{subsection.8.2}% 68
+\BOOKMARK [3][-]{subsubsection.8.2.4}{Suggestion}{subsection.8.2}% 69
+\BOOKMARK [2][-]{subsection.8.3}{Meeting prep Thursday 9 July}{section.8}% 70
+\BOOKMARK [2][-]{subsection.8.4}{Review of this week}{section.8}% 71
+\BOOKMARK [2][-]{subsection.8.5}{Questions}{section.8}% 72
+\BOOKMARK [2][-]{subsection.8.6}{Plan}{section.8}% 73
+\BOOKMARK [2][-]{subsection.8.7}{Meeting prep Thursday 11 June}{section.8}% 74
+\BOOKMARK [3][-]{subsubsection.8.7.1}{Review of this week}{subsection.8.7}% 75
+\BOOKMARK [3][-]{subsubsection.8.7.2}{Plan for next week}{subsection.8.7}% 76
+\BOOKMARK [3][-]{subsubsection.8.7.3}{Questions}{subsection.8.7}% 77
+\BOOKMARK [3][-]{subsubsection.8.7.4}{Review of this week \(this was for the last Thursday of May\)}{subsection.8.7}% 78
+\BOOKMARK [3][-]{subsubsection.8.7.5}{Plan for next week / ask what to do + suggest ideas / what I am currently puzzled by}{subsection.8.7}% 79
+\BOOKMARK [2][-]{subsection.8.8}{Meeting prep Thursday 14 May}{section.8}% 80
+\BOOKMARK [3][-]{subsubsection.8.8.1}{Questions}{subsection.8.8}% 81
+\BOOKMARK [3][-]{subsubsection.8.8.2}{Review of this week}{subsection.8.8}% 82
+\BOOKMARK [3][-]{subsubsection.8.8.3}{Plan for next week + future}{subsection.8.8}% 83
+\BOOKMARK [1][-]{section.9}{Conclusions}{}% 84
+\BOOKMARK [2][-]{subsection.9.1}{Mathematical Conclusions}{section.9}% 85
+\BOOKMARK [2][-]{subsection.9.2}{Critical analysis of learning and process}{section.9}% 86
+\BOOKMARK [2][-]{subsection.9.3}{Skills acquired}{section.9}% 87
+\BOOKMARK [2][-]{subsection.9.4}{Future work}{section.9}% 88
+\BOOKMARK [1][-]{section.10}{Articles to refrence that I have not added to bibtex yet}{}% 89
+\BOOKMARK [1][-]{appendix.A}{Peter E. Hydon, Symmetry Methods for Differential Equations - A Beginner's Guide}{}% 90
+\BOOKMARK [1][-]{appendix.B}{Geometric Numerical Integrations - Structure Preserving Algorithms for Ordinary Differential Equations.}{}% 91
+\BOOKMARK [1][-]{appendix.C}{Papers}{}% 92
+\BOOKMARK [1][-]{appendix.D}{Appendix B - Log}{}% 93
+\BOOKMARK [2][-]{subsection.D.1}{Friday 8 May 2020}{appendix.D}% 94
+\BOOKMARK [3][-]{subsubsection.D.1.1}{Goals}{subsection.D.1}% 95
+\BOOKMARK [3][-]{subsubsection.D.1.2}{Log}{subsection.D.1}% 96
+\BOOKMARK [2][-]{subsection.D.2}{Weekly Goals - week of 2020.05.11}{appendix.D}% 97
+\BOOKMARK [2][-]{subsection.D.3}{Monday 11 May 2020}{appendix.D}% 98
+\BOOKMARK [2][-]{subsection.D.4}{Thursday 11 May 2020}{appendix.D}% 99
+\BOOKMARK [2][-]{subsection.D.5}{Weekly Review - week of 2020.05.11}{appendix.D}% 100
+\BOOKMARK [2][-]{subsection.D.6}{Weekly Goals - week of 2020.05.18}{appendix.D}% 101
+\BOOKMARK [1][-]{appendix.E}{Appendix C}{}% 102
+\BOOKMARK [2][-]{subsection.E.1}{Random Attractors}{appendix.E}% 103
+\BOOKMARK [2][-]{subsection.E.2}{Henon-Heiles Attractor}{appendix.E}% 104
+\BOOKMARK [2][-]{subsection.E.3}{Other Stuff}{appendix.E}% 105

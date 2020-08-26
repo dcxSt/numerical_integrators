@@ -1,0 +1,51 @@
+This is BibTeX, Version 0.99d (TeX Live 2017/Debian)
+Capacity: max_strings=100000, hash_size=100000, hash_prime=85009
+The top-level auxiliary file: build/main.aux
+The style file: plain.bst
+Database file #1: MyBibliography.bib
+Warning--I didn't find a database entry for "..."
+Warning--empty journal in Omar
+Warning--empty journal in Duruisseaux
+Warning--empty year in Morin
+You've used 12 entries,
+            2118 wiz_defined-function locations,
+            566 strings with 5253 characters,
+and the built_in function-call counts, 2643 in all, are:
+= -- 236
+> -- 95
+< -- 1
++ -- 42
+- -- 28
+* -- 113
+:= -- 482
+add.period$ -- 36
+call.type$ -- 12
+change.case$ -- 42
+chr.to.int$ -- 0
+cite$ -- 15
+duplicate$ -- 136
+empty$ -- 245
+format.name$ -- 28
+if$ -- 545
+int.to.chr$ -- 0
+int.to.str$ -- 12
+missing$ -- 20
+newline$ -- 63
+num.names$ -- 24
+pop$ -- 85
+preamble$ -- 1
+purify$ -- 38
+quote$ -- 0
+skip$ -- 76
+stack$ -- 0
+substring$ -- 62
+swap$ -- 11
+text.length$ -- 1
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 32
+warning$ -- 3
+while$ -- 24
+width$ -- 14
+write$ -- 121
+(There were 4 warnings)

@@ -1,0 +1,65 @@
+\begin{thebibliography}{10}
+
+\bibitem{Arnold}
+Vladimir~Igorevich Arnold.
+\newblock {\em Mathematical methods of classical mechanics}, volume~60.
+\newblock Springer Science and Business Media, 1989.
+
+\bibitem{Omar}
+Omar~Abdel Baky.
+\newblock Symplectic integrators applied to hamiltonian dynamical systems.
+\newblock Dec 2019.
+
+\bibitem{Duruisseaux}
+Valentin Duruisseaux.
+\newblock Symplectic integration of hamiltonian systems.
+\newblock 2016.
+
+\bibitem{Numerical}
+Gerhard~Wanner Ernst~Hairer, Christian~Lubich.
+\newblock {\em Geometric Numerical Integration}.
+\newblock Springer, 2002.
+
+\bibitem{hairer2002geometric}
+Ernst Hairer, Christian Lubich, and Gerhard Wanner.
+\newblock Geometric integration of ordinary differential equations on
+  manifolds.
+\newblock {\em Springer Ser. Comput. Math}, 31, 2002.
+
+\bibitem{Symmetry-methods}
+Peter~E. Hydon.
+\newblock {\em Symmetry Methods for Differential Equations}.
+\newblock Cambridge University Press, 2010.
+
+\bibitem{KoszulZou}
+Yiming~Zou Jean-Louis~Koszul.
+\newblock {\em Introduction to Symplectic Geometry}.
+\newblock Springer, 2019.
+
+\bibitem{Morin}
+David Morin.
+\newblock {\em Introduction to Classical Mechanics}.
+\newblock Cambridge.
+
+\bibitem{Spivak}
+Michael Spivak.
+\newblock {\em Calculus on Manifolds}.
+\newblock Addison-Wesley Publishing Company, 1965.
+
+\bibitem{R-Steinhour}
+Ruth~A. Steinhour.
+\newblock The truth about lie symmetries: Solving differential equations with
+  symmetry methods.
+\newblock {\em The College of Wooster}, 2013.
+
+\bibitem{Townsend}
+John~S. Townsend.
+\newblock {\em A Modern Approach to Quantum Mechanics}.
+\newblock Viva Books, 2010.
+
+\bibitem{WBell}
+Willmann-Bell.
+\newblock {\em Fundamentals of Celestial Mechanics}.
+\newblock Danby, 1992.
+
+\end{thebibliography}

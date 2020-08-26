@@ -1,0 +1,42 @@
+\documentclass[12pt]{article}
+\usepackage{SteveStyle}
+
+\begin{document}
+
+\title{\texttt{Math 470 - Summary Report}}
+\author{Stephen Fay 260844060, under Prof. Gantumur Tsogtgerel}
+\date{May 1st to August 31st}
+\maketitle
+
+\begin{abstract}
+In this project we explore geometric properties of numerical integrators applied to Hamiltonian ordinary differential equations; we study the n-body problem, chosen for it's wealth of symmetries and chaotic behavior. We combine symplectic numerical schemes \cite{Numerical} with projections onto invariant manifolds, which we obtain with well known symmetry methods for dimensionality reduction \cite{Symmetry-methods}. Using backward error analysis we show that the projections violate symplecticity; postulating that the conjunctive use of these methods may give rise to an attractor, we investigate the Lyapunov spectrum of our modified equations but find evidence to the contrary for $n\geq 3$. 
+\end{abstract}
+
+\section{Symmetry methods}
+We look at lie groups, their algebras and their applications to differential equations. We study Noether's theorem at different levels of generality and abstraction; in the language of Lagrangian formalism invariant physical quantities such as energy and total angular momentum are found with Noether's theorem with respect to the kepler problem and the n-body problem. 
+
+We look at Pointcar\'e cuts of the Heinon-Heiles system, there appears to exist a first integral but at a critical energy bifurcation occurs and the conserved manifold becomes strange. 
+
+\section{Numerical Integration of Hamiltonian ODEs}
+Some classical integration schemes are surveyed with an eye kept on applications to Hamiltonian systems: euler methods, midpoint rule, Str\"omer Verlet and Runge-Kutta symplectic methods. After a brief venture into symplectic geometry we discuss the advantages of using symplectic integrators, proving relevant theorems along the way. 
+
+Projections onto invariant manifolds are introduced, various algorithms (some of my own inventions) are discussed and compared first with computational experiments, and later analytically. Certain other methods for preserving first integrals which where not implemented, such as solving equations in local coordinates, are also presented. 
+
+We apply the methods of backward error analysis to numerical integration schemes and compare the modified vector fields with the exact vector fields / one-forms; we determine second and third order modified terms to add to the modified equations based off of the projections to see if they improve the accuracy of the numerical flows. It is clear from these equations that the projected flows are no longer symplectic, this prompts further investigation of the flows.
+
+We suspect from the experiments that the numerical integrators with projection create an attractor in the two body problem; the experiments showed that if the orbit of the reduced mass starts off with small eccentricity, that the orbit would be attracted to circular motion. Also, numerical simulations of the two and many body problem showed that the projection methods tended to select for trajectories which maximized the angles between first integrals. From these two observations we postulate that the projection methods may give rise to an attractor. By taking the logarithm of the eigenvectors of the eigenvalues of the jacobian, we can estimate the lyapunov spectrum; apply this method to a symplectic integrator for which both the theory and the experiment yield pairs of Lyapunov exponents - each positive exponent has an equal in magnitude corresponding negative exponent (a theorem derived rigorously). If the hypothesis had been correct, we would have gotten that the sum of the spectrum of the projected equations would be negative, instead we found for three and four bodies, that the sum of the eigenvalues was positive, which is evidence for the opposite - that the introduction of projections makes the equations more chaotic rather than giving rise to an attractor. 
+
+
+\section{Conclusions}
+Something I found particularly satisfying about working on this project is that the theory and computational experiments complemented each other: the theory was driving the experiments, and the experiments where confirming the theory and driving me in new directions; for instance I would never have (alas, wrongly) suspected the existence of an attractor had I not seen some suspicion in the graphical behavior of numerical solutions to the kepler problem.
+
+Reading literature and diving into textbooks was a fascinating and informative experiance, this has prepared and motivated me to think more ambitiously and I feel I have gained some insight into how research in applied math is conducted.
+
+I was drawn to the kepler problem because I have been wrestling with it's quantum analogue for the last 4 months (Hydrogen atom), and with Noether's theorem in quantum mechanics for the past 11 months. 
+
+Many thanks to Prof. Gantumur Tsogtgerel for supporting and inspiring me along the way; and to my peers Selim Amar and Noah Nicodemo for staying in tune with my project and asking pertinant questions. 
+
+\bibliographystyle{plain}
+\bibliography{MyBibliography}
+
+\end{document}
