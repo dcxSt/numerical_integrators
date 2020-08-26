@@ -239,10 +239,10 @@ if __name__ == "__main__":
 
 
 # # TEST next_gamma
-# if __name__=="__main__":
-#     gamma = [[1,np.array([1])]]
-#     gammas = [gamma]
-#     for i in range(4):
-#         gamma = next_gamma(gamma)
-#         gammas.append(gamma)
-#     [print(gamma,end="\n\n") for gamma in gammas] 
+#if __name__=="__main__":
+#    gamma = [[1,np.array([1])]]
+#    gammas = [gamma]
+#    for i in range(4):
+#        gamma = next_gamma(gamma)
+#        gammas.append(gamma)
+#    [print(gamma,end="\n\n") for gamma in gammas] 

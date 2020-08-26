@@ -51,6 +51,25 @@ def update_lev_set_uvec(y,first_int_nablas):
         lev_set_uvec[name].append(u_vec)
     return
 
+def reset_dta():
+    global time,y,velocity_arr,net_lin_mom_y_arr,net_lin_mom_x_arr,position_arr,energy_arr,ang_momentum_arr,linear_momentum_arr,time_arr,radius_arr,k_factor_arr
+    time_arr = []
+    position_arr = []
+    velocity_arr = []
+    energy_arr = []
+    ang_momentum_arr = []
+    linear_momentum_arr = []
+    net_lin_mom_x_arr = []
+    net_lin_mom_y_arr =[]
+    k_factor_arr = []
+    radius_arr = []
+    y=Y0[:]
+    time=0
+    for name in lev_set_uvec.keys():
+        lev_set_uvec[name] = []
+    
+    return
+
 # helper function for keeping track of constants and stuff over time
 def update_dta(y,first_int_nablas=[(nabla_H,"energy"),
                                    (nabla_l,"angular_m"),
@@ -228,7 +247,10 @@ def display_invarients():
     plt.plot(time_arr,linear_momentum_arr,label='net linear moment')
     plt.plot(time_arr,net_lin_mom_x_arr,label='lin mom x')
     plt.plot(time_arr,net_lin_mom_y_arr,label='lin mom y')
-    plt.title('Linear Momentum\nMethod : {}'.format(method.__name__),fontsize=14)
+    try:
+        plt.title('Linear Momentum\nMethod : {}'.format(method.__name__),fontsize=14)
+    except:
+        plt.title('Linear Momentum',fontsize=14)
     plt.xlabel('time',fontsize=12)
     plt.ylabel('Linear Momentum',fontsize=14)
     plt.legend()
@@ -236,7 +258,10 @@ def display_invarients():
     plt.subplot(324)
     plot_relative_trajectories(steps_sep=0.5)
     # edited to use projection name, global variable
-    plt.title('Relative trajectories\nProjection : {}'.format(projection_name),fontsize=14)
+    try:
+        plt.title('Relative trajectories\nProjection : {}'.format(projection_name),fontsize=14)
+    except:
+        plt.title('Relative trajectories',fontsize=14)
     plt.xlabel('relative position x',fontsize=12)
     plt.ylabel('relative position y',fontsize=12)
     
@@ -360,6 +385,15 @@ projection_dic = {"None":None,
                "Parallel":proj.parallel_projection,
                "Standard":proj.standard_projection} 
 
+method_dic = {"exp euler":integrators.exp_euler,
+              "stromer verlet":integrators.stromer_verlet}
+
+proj_dic = {"no proj":[()],
+                 "energy":[(get_energy,nabla_H)],
+                 "ang mom":[(get_total_angular_momentum,nabla_l)],
+                 "both":[(get_energy,nabla_H),(get_total_angular_momentum,nabla_l)]}
+
+
 # method = integrators.fourth_order_kutta 
 # method = integrators.exp_euler 
 # method = integrators.exp_trapezium 
@@ -369,44 +403,102 @@ projection_dic = {"None":None,
 # method = integrators.slow_modified_flow_basic_order2_no_proj 
 # method = integrators.modified_energy_proj_order2
 
-if __name__ == "__main__":
-    
-    # choose the integration scheme 
-    method = integrators.modified_energy_proj_order2 
-    
-    # choose projection type if any 
-    projection_name = "None" 
-    projection = projection_dic[projection_name]
-    
-    k=50 # number of steps before update (for display purposes) 
-    
-    # integrate in STEPS iterations 
-    for i in range(STEPS): 
-        y = method(y) 
-        
-        # projection step
-        if projection!=None:
-            y = projection(y,first_integrals=[(get_energy,nabla_H)])
-            # y = projection(y,first_integrals=[(get_energy,nabla_H),
-            #                                   (get_total_angular_momentum,nabla_l)])
-        
-        # update every k steps 
+if __name__=="__main__":
+    # REGULAR OLD TESTING THE INTEGRATORS
+    k = 10
+    method = integrators.exp_euler
+    for i in range(STEPS):
+        y = method(y)
         if i%k==0:
-            time+=H*k
+            time += H*k
             update_dta(y)
-        
-    print("overflow occurence : {}".format(overflow_count)) 
-    
-    # DISPLAY
-    # before displaying you may want to take off some of the data from the trajcetories so that you can see what the 'stable orbit' looks like
-    # CHUCK = 300000
-    # try:
-    #     position_arr = position_arr[CHUCK:]
-    # except:
-    #     print("position array too small to chuck anything, not gonna do it")
-    display_relative(steps_sep=0.5,method_name = method.__name__,projection_type=projection_name)
-    # display_total_energy() 
+            
     display_invarients()
-    plt.savefig("./figures/gallary/invarients_configx_{}_{}_h={}_STEPS={}.png".format(method.__name__,projection_name,H,STEPS))
     plt.show()
+
+# if __name__ == "__main__":
+#     # TESTING THE MODIFIED EQUATIONS
+#     # FIRST INTEGRATE USING NORMAL INTEGRATOR
+#     proj_man_name = "energy"
+#     proj_manifolds = proj_dic[proj_man_name]
     
+    
+#     # choose the integration scheme 
+#     method_name = "exp euler" 
+#     method = method_dic[method_name]
+    
+#     # choose projection type if any 
+#     projection_name = "Naive" 
+#     projection = projection_dic[projection_name]
+    
+#     k=10 # number of steps before update (for display purposes) 
+    
+    
+    
+#     # # integrate in STEPS iterations 
+#     # for i in range(STEPS): 
+#     #     y = method(y) 
+        
+#     #     # projection step
+#     #     if projection_name!="None":
+#     #         y = projection(y,first_integrals = proj_dic[proj_man_name])
+            
+#     #     # update every k steps 
+#     #     if i%k==0:
+#     #         time+=H*k
+#     #         update_dta(y)
+        
+#     # print("overflow occurence : {}".format(overflow_count)) 
+    
+#     # display_invarients()
+#     # # plt.savefig("./figures/gallary/invarients_configx_{}_{}_h={}_STEPS={}.png".format(method.__name__,projection_name,H,STEPS))
+#     # plt.show() 
+        
+
+#     # INTEGRATE USING MODIFIED EQUATION, with step-size R times smaller
+#     # R = 1
+#     # h = H 
+#     # H = int(H/R)
+#     # STEPS = int(R*STEPS)
+#     # reset_dta()
+    
+#     h = 0.01
+    
+#     for i in range(STEPS):
+#         y = integrators.fourth_order_kutta_modified_flow(y , d2_name = method_name,
+#                                             h=h, flow_name = proj_man_name)
+        
+#         # update every k steps 
+#         if i%k==0:
+#             time+=H*k
+#             update_dta(y)
+            
+            
+#     display_invarients()
+#     # plt.savefig("./figures/gallary/invarients_configx_{}_{}_h={}_STEPS={}.png".format(method.__name__,projection_name,H,STEPS))
+#     plt.show()
+    
+    
+    
+    
+    
+    
+    
+#     # DISPLAY
+#     # before displaying you may want to take off some of the data from the trajcetories so that you can see what the 'stable orbit' looks like
+#     # CHUCK = 300000
+#     # try:
+#     #     position_arr = position_arr[CHUCK:]
+#     # except:
+#     #     print("position array too small to chuck anything, not gonna do it")
+    
+#     # display_relative(steps_sep=0.5,method_name = method.__name__,projection_type=projection_name)
+#     # display_total_energy() 
+
+
+
+
+
+
+
+

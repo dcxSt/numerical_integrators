@@ -146,6 +146,17 @@ def partial_Hpp(y):
     col4 = (0,0,0,1/M2) 
     return np.array((col1,col2,col3,col4)) 
 
+def hessian_l(y):
+    col1 = (0,0,0,0,0,-1,0,0)
+    col2 = (0,0,0,0, 1,0,0,0)
+    col3 = (0,0,0,0,0,0,0,-1)
+    col4 = (0,0,0,0,0,0, 1,0)
+    col5 = (0, 1,0,0,0,0,0,0)
+    col6 = (-1,0,0,0,0,0,0,0)
+    col7 = (0,0,0, 1,0,0,0,0)
+    col8 = (0,0,-1,0,0,0,0,0)
+    return np.array((col1,col2,col3,col4,col5,col6,col7,col8))
+
 # returns 4x4x4 tensor
 def partial_Hqqq(y):
     return
@@ -165,10 +176,10 @@ def nabla_q(q):
 def nabla_l(y):
     p1,p2,q1,q2 = y[0],y[1],y[2],y[3]
     nablal = []
-    nablal.append(np.array([q1[1] , -q1[0]])) # partial p1 
-    nablal.append(np.array([q2[1] , -q2[0]])) 
-    nablal.append(np.array([ -p1[1] , p1[0]])) 
-    nablal.append(np.array([ -p2[1] , p2[0]])) 
+    nablal.append(np.array([ -q1[1] , q1[0]])) # partial p1 
+    nablal.append(np.array([ -q2[1] , q2[0]])) 
+    nablal.append(np.array([ p1[1] , -p1[0]])) 
+    nablal.append(np.array([ p2[1] , -p2[0]])) 
     return np.array(nablal)
 
 # gradient of the total linear momentum in the x direction

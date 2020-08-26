@@ -32,11 +32,14 @@ M2 = 1.4
 M = M1+M2
 M_REDUCED = M1*M1 / M
 ETA = -G*M1*M2 
-Y0 = np.array([np.array([0.4,0.0]),np.array([-0.4,-0.0]),
+# Y0 = np.array([np.array([0.4,0.0]),np.array([-0.4,-0.0]),
+#                np.array([0.,-1.0]),np.array([0.,1.0])])# cartesian (p1,p2,q1,q2)
+
+Y0 = np.array([np.array([0.42,-0.01]),np.array([-0.42,0.01]),
                np.array([0.,-1.0]),np.array([0.,1.0])])# cartesian (p1,p2,q1,q2)
 
-H = 0.0001 # timestep 
-STEPS = 50000
+H = 0.01 # timestep 
+STEPS = 5000
 
 
 NABLA_LIN_X = np.array([np.array([1,0]),np.array([1,0]),np.array([0,0]),np.array([0,0])])
