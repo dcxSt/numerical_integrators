@@ -1,0 +1,217 @@
+\documentclass[12pt]{article}
+\usepackage{SteveStyle}
+
+\begin{document}
+
+\title{Math 470 - meeting prep notes}
+\author{Stephen Fay 260844060, under Prof. Gantumur Tsogtgerel}
+\date{May 1st to August 31st}
+\maketitle
+
+\subsection{Meeting prep Thursday 16 July}
+\subsubsection{Review of week}
+\begin{itemize}
+    \item started section 6 (Lyapunov exponents)
+    \item finished analysis of modified equations (for now)
+\end{itemize}
+\subsubsection{Questions}
+Some questions about conservation of volume and stuff to do with that, symplectic form, Lyapunov exponents and Liouville's theorem... Some questions about chaotic systems...
+\subsubsection{Plan for next week}
+\begin{itemize}
+    \item Numerical stuff
+    \begin{enumerate}
+        \item implement the modified equations for the explicit Euler and St\"ormer Verlet modified numerical flows with small time-steps to see if these are faithful to the numerical flows of the equations with large time-steps Kepler problem (~5h), n body (+3h)
+        \item implement the modified equations with the projection O($h^2$) term, test this one against the projection method equations [rem you have to compute the hessian of the ang momenta too] (+3h)
+        \item implement modified equations with exaggerated projection term so that the effect is even more perturbed
+        \item implement lyapunov exponent finder (chapter 3 of Arkdey et al., best if you're comfortable with the theory from chapter 2 first though... so this will probably take some time to get to). Goal is to have this done by next week.
+    \end{enumerate}
+    \item Theoretical stuff
+    \begin{enumerate}
+        \item understand chaos better, attractors, lyapunov exponents, lyapunov exponents for ergotic and symplectic systems and lyapunov exponents with regards to attractors. 
+    \end{enumerate}
+\end{itemize}
+
+\subsection{Meeting prep Thursday 18 June}
+\subsubsection{Review of week}
+\begin{itemize}
+    \item Dumped the old 'difference flow' idea I had been working with, it's not easy to analyse...
+    \item Worked on modified equations
+    \item worked on exact solution to Kepler problem
+\end{itemize}
+
+\subsubsection{Questions}
+Trying to modify the equation i have numerical flow? \\
+
+Can't figure out why the second order term dissapears with the explicit euler flow - ask Gantumur if he can spot mistake in equation / thinking.\\
+
+Let $\phi_t$ be the time translation operator and $M$ the invariant manifold. Working in local coordinates.\\
+
+My most immediate problem, though perhaps it won't be too hard, is finding what $D\phi_t$ is for exact flows and for the numerical flows. For the exact flow we have 
+$$\phi_t(y_0) = 
+\lim_{n\to\infty} \left( \unit + \frac{t}{n}J^{-1}\nabla H \right)^n (p,q)
+$$
+
+\subsubsection{Plan for next week}
+\begin{itemize}
+    \item Implement the differential of the form, go through derivation of equivalence of hamiltonian and symplectic systems, write it out here in report and implement a method which shows us how the form is changing. The whole buiseness with 
+    $$
+    D\phi_t^T(y_0) J D\phi_t(y_0) \equiv J
+    $$
+    find a way of expressing how much the quantity changes infinitesimally, if there is an invarient manifold any two vectors $\xi,\eta \in T_y M$ will eventually be squiched into a smaller dimension...
+    \item Explore the same thing as above but with the area form $dp_1\wedge dp_2\wedge dp_3\wedge \cdots \wedge dq_d$. Basically the volume preservation thing will be approximating the derterminant of the modified flow's jacobian. I think in order to prove that 
+    
+    \item finally get round to writing out the exact solution of Kepler problem - I've been stubbornly trying to derive this myself for a few days using symmetry methods learned from symmetry methods for modified equations - it should be a textbook example of applications of lie symmetries for reduction of order, but have been struggle with this. 
+    
+    \item Reread relevant sections of \cite{Spivak} think of best way of getting the `area form' on the manifold. There are several ways you could do this, either take an orthonormal basis where the first $m$ vectors are in $T_{y_0} M$ and the other vectors are in the perp space. Find $D\phi_t$ and act on these vectors with $D\phi_t$ and then take their wedge. Remind yourself how the Alternation map works I think it's something like 
+    $$
+    Alt(v_1\otimes \cdots\otimes v_m) = v_1\wedge \cdots \wedge v_m = \frac{1}{m!}\sum_{\tau\in S_m} \text{sign}(\tau) (v_{\tau(1)} \otimes\cdots\otimes v_{\tau(m)})
+    $$
+    whatever it is it's definitely in Spivac, this is for next week. The above ideas are all ideas of how to analyse the modified equations but I need to make sure that I have the right ones first, so once the issue of finding the numerical flows is fixed, find the modified equations for the projection methods up to as high order as possible. Perhaps start with $O(h^2)$ but it would be nice to go up to $O(h^4)$ if I can. Also before you start messing with the modified equations it would be nice to have some more experimental data and postulates to test out with numerical stuff. For things like preservation of the area form on invarient manifold can be done both analytically and with experiment, that means that you could do well to set up the 
+    
+    \item Things to implement and plot in kepler as well as n-body 
+    \begin{enumerate}
+        \item $\left| D\phi_t^t J D\phi_t\right|$ - although I have to first figure out what this even menas!
+        \item more concrete symplectic form instruments, much work to be done on these
+        \item area form stuff described above. 
+    \end{enumerate}
+\end{itemize}
+
+\subsubsection{Suggestion}
+evolve a bunch of near-bye points, 
+
+check out Lyapunov exponent, read...
+
+\subsection{Meeting prep Thursday 9 July}
+\subsection{Review of this week}
+
+\subsection{Questions}
+\begin{itemize}
+    \item To my understanding, the $q$ in a Lagrangian represents postition and the $p$ has to do with change in $\dot q$; whereas I think in Hamiltonian systems $p$ and $q$ are more abstract...? Is this correct?
+    \item 
+\end{itemize}
+
+\subsection{Plan}
+
+\subsection{Meeting prep Thursday 11 June}
+\subsubsection{Review of this week}
+\begin{itemize}
+    \item Numerical experiments conducted, specially for the Kepler problem.
+    \item Read articles about topology of invariant manifolds, specifically the energy manifold for the 2 and 3 body problem, this stuff is interesting but quite challenging to understand, should I invest more brain into this or is it too tanjential wrt the project?
+    \item Postualted a differential equation on $TM$ which models the difference between the numerical + projection flow and the exact flow. 
+    \item Wrote some methods for showing the accretion onto invariant manifold.
+    \item Reasons for thinking the projections induce an attractor:
+    \begin{itemize}
+        \item For the symplectic Str\"omer Verlet method, when we have configurations where this method preserves a periodic angle between energy and ang mom manifolds, projecting at every step knocks the Str\"omer Verlet method off it's syplectic path.
+        \item Only with the explicit euler method (+ projection) the k-factor goes to zero - it's only with exp euler that the orbits tend toward circular orbits.
+        \item 
+    \end{itemize}
+\end{itemize}
+
+Notes and takeaways : generally speaking the best projection method is the `parallel' one, at least for the Kepler problem, it seems to preserve the actual behaviour of orbits a little better than the other projection methods. Although all methods exhibit similar behaviour, there is no drastic difference between them observed thus far. 
+
+For some reason the explicit euler method (without projection) sometimes also tends to maximize the angles between invarient first integrals. I have see the Str\"omer Verlet method do this too for configuration 2.
+
+
+
+\subsubsection{Plan for next week}
+\begin{itemize}
+    \item Re-factor Kepler problem code and write documentation? (ask if important)
+    \item Calculate the difference flow field for energy in the (reduced) kepler problem
+    \item Calculate the difference flow field for angular momentum
+    \item Combine them and see if you can find invariant solutions. Some candidates are circular orbits!
+    \item Find analytical paths which you think are invariant under the difference flow (e.g. equal mass, same relative velocities).  
+\end{itemize}
+
+\subsubsection{Questions}
+\begin{itemize}
+    \item Is the topology of the energy manifold of the modified/truncated equation the same as the exact equation and does this have any baring on the solution? My guess is that for the n body problem it will change something. Should I read more about this?
+    \item what is a weakly attracting manifold
+\end{itemize}
+
+
+
+\subsubsection{Review of this week (this was for the last Thursday of May)}
+\begin{itemize}
+    \item comparison plots for energy of Kepler problem - talk about the code
+    \item show them the cuts - this was kind-of a curiosity, I'm not sure how useful it's going to be; originally I wanted this to be about the 
+\end{itemize}
+
+\subsubsection{Plan for next week / ask what to do + suggest ideas / what I am currently puzzled by}
+\tbf{THEORY}
+\begin{enumerate}
+    \item It is still not clear in my mind how angular momentum works for many body systems, for a central potential (with one particle) conservation of total angular momentum and of angular momentum along each axis can be derived from the fact that the system admits the group $U(d)$ (a lie group of dimension $d^2$) [is it correct to say that the generators of this group commute with the generator of time translations? - I tried to answer this myself mathematically]
+    \item Understand the Legendre transform and the link between Hamiltonian and Lagrangian mechanics
+    \item Understand better the symmetries of many body problems 
+    \item really understand fully the equivalence of the condition of syplecticity and being a hamiltonian system
+    \item derive a more general and broad version of Noether's theorem that uses hamiltonian formalism and tricks from the book, rather than lagrangian formalism and the argument I had above. 
+\end{enumerate}
+\tbf{EXPERIMENT}
+\begin{enumerate}
+    \item fix the projection method, get it to work properly, ask for guidance from Gantumur - unfortunately I did not get to test the multi-projection method properly before the meeting because it turns out my projections onto the angular momentum manifold were no good to start with...
+    \item implement many body problem? (particles / solar-system)
+    \item 
+\end{enumerate}
+
+read up on statistical methods for evaluating chaotic systems (good integration methods)
+
+
+\subsection{Meeting prep Thursday 14 May}
+\subsubsection{Questions}
+\begin{enumerate}
+    \item Q: for Gantumur: a conservation law is just a first integral of a hamiltonian, are there hamiltonian systems where the level sets of the first integrals are more than just the momentum and energy manifolds? - are there more symmetries?
+
+    \item Q: I'm trying to figure out how we can identify symmetries in the hamiltonian, given this hamiltonian ode
+    $$\dot y = J^{-1}\nabla H\qquad J = \begin{pmatrix}0&I\\-I&0\end{pmatrix}$$
+    is the following statement correct?
+    $$
+    [X , J^{-1}\nabla H] = 0 \RA [\Gamma_\epsilon , J^{-1}\nabla H] = 0 \RA \text{does the symmetry preserve $\L$ ?}
+    $$
+    Am I correct in thinking that Noether's theorem implies that for each one parameter lie group $\Gamma_\epsilon$ acting on the solution set $S$, there exists a first integral $\phi_\Gamma$; and that the orbits of $\Gamma_\epsilon$ cross the level sets of $\phi_\Gamma$ transversly
+    
+    \item Q: Theorem 2.6 page 185 of \cite{Numerical} asserts that a system is symplectic iff locally hamiltonian and vice versa, does this mean that all of the symmetries of the Hamiltonian are preserved by symplectic maps?
+    
+    \item Q: Page 191 in \cite{Numerical}, there is something that looks like Category theory. (this is okay actually I just have to read it more and better)
+    
+    \item Q: I think J.P. Lessard is working on placing analytical error boundary on numerically computed solutions to odes, is there a way of doing this with symplectic integrators? (I think the ones we saw in Lessard's class (325 odes) were using picard iterations + contraction mapping theorem)
+    
+    \item Q: I don't really understand Noah and Selim's projects', I'd quite like to be able to participate in the discussions, is there something someone can send me that I might be able to have more theoretical understanding of how this works. 
+    
+    \item Q: in chapter 8 of \cite{Symmetry-methods} there is a section on `Finding Symmetries by Computer Algebra', in your opinion is this something that is worth looking into eventually
+
+
+\end{enumerate}
+
+\subsubsection{Review of this week}
+\begin{itemize}
+    \item read Hydon's book, did the exo's in ch 2 and 3 ; Assesment :  struggled more than I thought I would with these, need to do more intense sessions, specially for solving the questions at the end of the chapters; the groundwork is done, I am familiar with the concepts, terminology and basic examples, now it's time to start looking at some more elaborate ones and solve them
+    \item theoretical understanding of simplecticity (+ Hamiltonian systems) gained + symmetric methods
+    \item disappointed that I didn't get the numerical experiments under-way, will make greater efforts next week to start with those, perhaps solar system equations are a good place to start
+\end{itemize}
+
+\subsubsection{Plan for next week + future}
+\tbf{Symmetry methods for differential equations}
+\begin{enumerate}
+    \item really understand Noether's theorem, find a more generalized statement of it (+ it's 3 varients)
+    \item read thoroughly chapters 4, 5 and 6, do all (if not half) of the excersises up till beg of ch 7. 
+    \item play with the equations from these books numerically with computer? (generate vector fields for some of the examples + vector fields of symmetries)
+\end{enumerate}
+\tbf{Numerical methods}
+\begin{itemize}
+    \item Experiment
+    \begin{enumerate}
+        \item implement euler method for solar system
+        \item implement runge kutta symmetric (Str\"omer-Verlet) method for solar system
+        \item implement runge kutta symplectic method for solar system
+        \item conduct backward error analysis
+        \item test projection methods for all (onto H and L)
+    \end{enumerate}
+    \item Theory
+    \begin{enumerate}
+        \item Chapter III? - Ask Gantumur if this is worth reading. 
+        \item reading of IV and V
+        \item chapter VI in depth
+    \end{enumerate}
+\end{itemize}
+
+
+\end{document}

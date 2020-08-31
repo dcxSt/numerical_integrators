@@ -25,17 +25,13 @@
 
 \tableofcontents
 
-\section{Motivation and Plan}
-
-Lie group symmetries are an essential tool for solving many differential equations, and specifically for solving hamiltonian systems. They are used vastly in Quantum mechanics. The goal is to learn and master some techniques involving these symmetries used to solve ordinary and partial differential equations. Applications to quantum mechanics will be studied, as well as numerical integration schemes that preserve Lie symmetries. 
-
 \section{Lie Symmetries for Solving DEs}
 
 \subsection{Preliminaries.}
 
 This section draws largely from \cite{R-Steinhour},\cite{Symmetry-methods}.\\ We start by considering first order differential equations of the form
 \begin{equation}\label{eq:first order equation}
-    \frac{dy}{dx} = \omega(x,y)
+    \frac{dy}{dx} = \omega(x,y)\qquad,\quad \R \supset D \to \R
 \end{equation}
 
 A \tbf{symmetry} of an ode \eqref{eq:first order equation} is a diffeomorphism $\Gamma : \R^2\to\R^2$ with $(x,y)\mapsto (\hat x,\hat y)$ such that the differential equation is preserved.
@@ -48,11 +44,11 @@ we can simplify the above equation to obtain\\ \textit{The \tbf{symmetry conditi
     \frac{d\hat y}{d\hat x} = \frac{dx \partial_x \hat y + dy \partial_y\hat y}{dx \partial_x \hat x + dy\partial_y \hat y} = \frac{D_x \hat y}{D_x \hat x} = \frac{\partial_x \hat y + \frac{dy}{dx}\partial_y\hat y}{\partial_x \hat x + \frac{dy}{dx}\partial_y\hat x} = \omega(\hat x,\hat y)
 \end{equation}
 
-The set of symmetries $\{\Gamma : \R^2\to\R^2 | \eqref{eq:the symmetry condition}\,\,\text{holds} \}$ forms a group under composition. We focus on Lie groups for now, these are continuous groups which are also smooth manifolds. An \textit{invariant point} is mapped to it's self by every lie symmetry. An \textit{invariant solution} of some symmetry $\Gamma$ is mapped to it's self by $\Gamma$, so $S_1 = \{(x,f(x)) : x\in \R\}$ is invariant iff $\Gamma(x,f(x)) = (x' , f( x'))$.  
+It is clear that the set of symmetries $\{\Gamma : \R^2\to\R^2 | \eqref{eq:the symmetry condition}\,\,\text{holds} \}$ is closed under composition and inverses, and thus forms a group. Lie groups are continuous groups which are also smooth manifolds. An \textit{invariant point} is mapped to it's self by every lie symmetry. An \textit{invariant solution} of some symmetry $\Gamma$ is mapped to it's self by $\Gamma$, so $S_1 = \{(x,f(x)) : x\in \R\}$ is invariant iff $\Gamma(x,f(x)) = (x' , f( x'))$.  
 
-Given a group $G$ acting on the plane $\R^2$, the symmetries $S$ of a differential equation, this can be written $G\acts S$ or indeed $G\to \Sym(S)\subset \text{Diffeomorphisms}( \R^2\to\R^2 )$. The \textit{orbit} of an element $(x,y)$ is the set of elements $G \cdot (x,y) = \{(\hat x, \hat y) : \exists \Gamma\in G | \Gamma (x,y) = (\hat x,\hat y) \}$. 
+Given a group $G$ acting on the plane $\R^2$, the symmetries $S$ of a differential equation, this can be written $G\acts S$ or $G\to \Sym(S)\subset \text{Diffeomorphisms}( \R^2\to\R^2 )$. The \textit{orbit} of an element $(x,y)$ is the set of elements $G \cdot (x,y) = \{(\hat x, \hat y) : \exists \Gamma\in G | \Gamma (x,y) = (\hat x,\hat y) \}$. 
 
-The action of a one parameter $(\epsilon)$ lie group near $\epsilon=0$ can be expressed as the Taylor expansion
+The action of a one parameter (denoted by $\epsilon$) lie group for sufficiently small $\epsilon$ can be approximated by the Taylor expansion
 
 \begin{equation}\label{eq:one param lie group taylor}
     \Gamma_\epsilon : (x,y)\mapsto (\hat x,\hat y)_\epsilon\suchthat \begin{cases}\hat x = x + \epsilon \xi(x,y) + O(\epsilon^2)\qquad : \quad \frac{d\hat x}{d\epsilon} = \xi(\hat x,\hat y) \\ \hat y = y + \epsilon\eta(x,y) + O(\epsilon^2) \qquad :\quad \frac{d\hat y}{d\epsilon} = \eta(\hat x,\hat y) \end{cases}
@@ -65,13 +61,13 @@ We introduce the \tbf{characteristic} $\mathcal Q(x,y,y')=\eta(x,y)-y'\xi(x,y)$ 
 
 (\cite{Symmetry-methods} p19 thought 21 and 31 for linearized characteristic)
 
-The $n$-th \tbf{jet-space} $J^n$ of an ode $\dot y(t) = \omega(t,y,y',y'',\cdots,y^{(n)})$ is the $n+2$ dimensional Euclidean space spanned by $t,y$ and the first $n$ order derivatives of $y$, i.e. it is spanned by the variables $(t,y,y^{(1)},y^{(2)},\cdots,y^{(n)})$. Each solution curve $y(t)$ defines a curve parameturzied by $t$ in the jet space called the \tbf{lift}. The ode defines a hyper-surface $S$ on the jet-space. The map which brings each solution curve to it's lift is injective, and the image of the solution set in the jet-space is $S$. The extension of the action $\Gamma$ to all derivatives of order $n$ or less is the $n$-th \tbf{prolongation} of $\Gamma$; $\Gamma$ maps solution curves to solution curves, thus it's prolongation maps $S$ to it's self. 
+The $n$-th \tbf{jet-space} $J^n$ of an ode $\dot y(t) = \omega(t,y,y',y'',\cdots,y^{(n)})$ is the $n+2$ dimensional Euclidean space spanned by $t,y$ and the first $n$ derivatives of $y$, i.e. it is spanned by the variables $(t,y,y^{(1)},y^{(2)},\cdots,y^{(n)})$. Each solution curve $y(t)$ defines a curve parameturzied by $t$ in the jet space called the \tbf{lift}. The ode defines a hyper-surface $S$ on the jet-space. The map which brings each solution curve to it's lift is injective, and the image of the solution set in the jet-space is $S$. The extension of the action $\Gamma$ to all derivatives of order $n$ or less is the $n$-th \tbf{prolongation} of $\Gamma$; $\Gamma$ maps solution curves to solution curves, thus it's prolongation maps $S$ to it's self. 
 
 \subsection{Lie Groups and Algebras.}
 
 A \tbf{group} $G$ is a set together with a binary operation $\ast : G \to \text{End} (G)$ or $\ast : G\times G \to G$. Axioms : identity, asociativity, closed under composition and inverses. 
 
-A \tbf{Lie Group} is an infinite group which is also a \tbf{differentiable manifold}. We restrict our attention to manifolds embedded in an ambiant space $\R^n$. Therefore a Lie Group is a differentiable manifold $\mathcal M\subset \R^n$ with a binary operation $\ast : \mathcal M \to \{\mathcal M \xrightarrow[]{f} \mathcal M : f\,\text{ is a bijective diffeomorphism}\}$. The binary operation $\ast$ takes an element $g\in \mathcal M$ to a \textit{bijective diffeomorphism} $f_g$ of the manifold $G$. We can think about a lie group abstractly as a group $G$ with a map $F : G\to \mathcal M \times \text{diff} (\mathcal M)$. So $F(g) = \{m_g,f_g\}$, the image of $g\in G$ is a point $m_g\in\mathcal M$ and a diffeomorphism $f_g : \mathcal M \to \mathcal M$. The identity of the lie group is $F(\unit_G) = \{p , \unit_{\text{diff}(\mathcal M)}\}$. Sometimes we wish to only consider the group properties of some specific lie group, to consider only the group structure (without the manifold), in which case we can view the lie group as, more fundamentaly, a continuous group which admits a faithful and continuous (or is it sensible to use differentiable) representation on the bijective diffeomorphisms of some differentiable manifold. We have set ourselves up to define the lie algebra. 
+A \tbf{Lie Group} is an infinite group which is also a \tbf{differentiable manifold}. We restrict our attention to manifolds embedded in an ambiant space $\R^n$. Therefore a Lie Group is a differentiable manifold $\mathcal M\subset \R^n$ with a binary operation $\ast : \mathcal M \to \{f:\mathcal M \to \mathcal M : f\,\text{ is a bijective diffeomorphism}\}$. The binary operation $\ast$ takes an element $g\in \mathcal M$ to a \textit{bijective diffeomorphism} $f_g$ of the manifold $G$. We can think about a lie group abstractly as a group $G$ with a map $F : G\to \mathcal M \times \text{diff} (\mathcal M)$. So $F(g) = \{m_g,f_g\}$, the image of $g\in G$ is a point $m_g\in\mathcal M$ and a diffeomorphism $f_g : \mathcal M \to \mathcal M$. The identity of the lie group is $F(\unit_G) = \{p , \unit_{\text{diff}(\mathcal M)}\}$. Sometimes we wish to only consider the group properties of some specific lie group, to consider only the group structure (without the manifold), in which case we can view the lie group as, more fundamentaly, a continuous group which admits a faithful and continuous (or is it sensible to use differentiable) representation on the bijective diffeomorphisms of some differentiable manifold. We have set ourselves up to define the lie algebra. 
 
 A \tbf{Lie Algebra} $\mathfrak g$ of a lie group $G$ is the tanjent space at the identity $T_p\mathcal M$ together with an alternating bi-linear map $\mathfrak g\times \mathfrak g \to \mathfrak g$ , $(a,b)\mapsto [a,b]$ called the \tbf{lie bracket}, the lie bracket operator is induced by the group binary operation $\ast$. 
 
@@ -524,13 +520,13 @@ the form is preserved.
 
 \qed
 
-\tbf{Corollary} \textit{Liouville's Theorem: It is immediate that the volume is preserved.} $\det(J) = 1$ thus
+\tbf{Corollary} \textit{Liouville's Theorem: It follows that the volume is preserved.} $\det(J) = 1$ thus
 
 $$
 \det(D\psi_t^TJD\psi_t) = \det(D\psi_t)^2 = 1 \RA \det(D\psi_t)=\pm 1
 $$
 
-since $D\psi_t$ is continuous wrt $t$ and $D\psi_{t=0}=\unit$ thus $\det (D\psi_t)\equiv 1$
+$D\psi_t$ is continuous wrt $t$ and $D\psi_{t=0}=\unit$ thus $\det (D\psi_t)\equiv 1\quad\forall t$
 
 \qed
 
@@ -555,6 +551,11 @@ since the symplectic form is preserved then so are the wedges of the symplectic 
 \textbf{Def} : a method $\phi_h : y_n\mapsto y_{n+1}$ is \textbf{symplectic} if the numerical flow is symplectic. Rem, the numerical flow can be approximated by a series expansion $\phi_h(y) = y + hf(y) + h^2d_2(y) + O(h^3)$. We say that a method is symplectic to $k$th order if the first $k$ terms of the modified equation of the numerical flow are symplectic? - or do we say this when the numerical flow is actually symplectic; I'm pretty sure it's just when the first $k$ terms are syplectic. 
 
 \subsubsection{Explicit Euler}
+This is the most straight forward method. For the ODE $y' = f(y,t)$ the explicit euler method is defined
+\begin{equation}\label{eq:explicit euler}
+y_{n+1} = \phi_h(y_n , n\cdot h) = y + h f(y_n, n\cdot h)
+\end{equation}
+
 \subsubsection{Str\"omer Verlet}
 The (explicit one-step) Str\"omer Verlet method is a symplectic integrator, who's numerical flow is given below for the $n$-body problem $\phi_h : (p_n,q_n)\mapsto (p_{n+1},q_{n+1})$
 \begin{equation}\label{eq:stromer verlet n body}
@@ -569,6 +570,116 @@ In section \ref{section:truncated modified equations} we show that the numerical
 
 \subsubsection{Explicit Midpoint rule}
 Estimate the midpoint, use gradient at this point to find multiplied by the stepsize $h$ to determine where to next.
+
+
+
+
+\subsection{Kepler Projection Methods Experiment.}
+\subsubsection{Aim}
+To find some numerical evidence for or against the hypothesis, to generate ideas for where to go next, to gain intuitive understanding of which numerical integrators work better for this type of problem, do error analysis. 
+
+\subsubsection{Theory / Hypothesis}
+
+The setup is the two body or Kepler problem with point masses $m_1,m_2$ the hamiltonian is the usual one with parameters $p_{11},p_{12},p_{21},p_{22},q_{11},q_{12},q_{21},q_{22}$. The total mass is denoted $M$, and the reduced mass $\mu$, the reduced velocity is an $\R^2$ vector and is denoted $v$ and the reduced distance $r$. 
+
+The Kepler problem is given by the ode
+\begin{equation}\label{eq:ode kepler}
+    \dot y = (\dot p,\dot q) = J^{-1}\nabla H(p,q)
+\end{equation}
+where $J = \left[\begin{array}{c|c}0&\unit\\\hline-\unit&0\end{array}\right]$ is the canonical symplectic form and $H$ is the Kepler hamiltonian.
+
+We can solve it analytically, see \cite{WBell} page 129. 
+
+There is a theorem which states that syplectic flow which conserve all first integrals (invariants) of a Hamiltonian system (Find the theorem and name it, state it formally and possibly prove it!) must be exact, i.e. there is a unique syplectic flow which conserves all first integrals. The projection methods' numerical flow conserves all invariants, is not exact and hence is not symplectic. 
+
+
+Our ode \eqref{eq:ode kepler} can either be viewed as an 8 dimensional beast or, when put into the inertial CM frame we can reduce the dimensions to 4, in which case it is the same ode as of a single reduced mass orbiting a central potential in the plane. We do not reduce the dimensions for the integration schemes for we wish to use similar integrators for the n-body problem. With every integration step we project onto the the $L-E$-manifold, the intersection of the energy and angular momentum first integrals. In the following numerical experiments, we are looking for evidence of an attracting sub-manifold of the $L-E$-manifold. This is the main hypothesis : the numerical flow of projection methods creates attractors.
+
+\subsubsection{Method}
+
+We use the following methods to try and gauge what is going on.
+
+The acceleration of a point mass travelling in a circle is $a_c = v^2/|r|$ (inwards), the centripetal acceleration of the reduced mass is $GM/{|r|^2}$. We define the \tbf{k-factor} as the quantity $k(p,q) = v^2 - \frac{GM}{|r|}$. Hence, when the orbit is circular this quantity goes to zero $k\to 0$. If the orbit is elliptical and highly eccentric, we should observe this quantity oscillating wildly up and down with each orbit, the $k$-factor for the exact flow, for such an orbit should be a periodic and un-damped. We use this quantity to see if an integration scheme is pulling the orbit into a circular one. 
+
+Another quantity we are interested in is the \tbf{angle} between the first-integral level surfaces $L$ and $E$ onto which we are projecting. Using the euclidean metric induced by the $(p,q)$ coordinate system we define the angle between these manifolds at a point $p$ as the arc-cosine of the absolute value of the dot product of their area-forms. Taking the absolute value gives us the acute angle. The dot product of the area forms are the same as the dot product of their Hodge-duels which are parallel to the gradients of the first integral functions. So the acute angle of surfaces $H=cnst$ and $L=cnst$ with area forms $\omega_H,\omega_L$ resp. are given by 
+
+\begin{equation}\label{eq:angle between level sets}
+    \theta_p = \arccos{|\omega_H(p) \cdot \omega_L(p)|} = \arccos|\star \omega_H(p) \cdot \star\omega_L(p)| = \arccos\left| \frac{\nabla H \cdot \nabla L }{|\nabla H| |\nabla L|} \right|_p
+\end{equation}
+
+The projection methods used are given in detail above.
+
+The 
+
+\tbf{Error analysis}. For the syplectic integrators we can do some backward error analysis, comparing the truncated modified vector field with the exact one. And second since there is an analytic solution to the Kepler problem we can just compare our results with the exact solution and obtain the global error of each method. 
+
+\subsubsection{Results, Observations, Remarks, Speculation.}
+
+
+
+For reference the k-factor is 
+
+\begin{equation}
+    v^2 - \frac{G M}{r}\qquad:\quad M = m_1+m_2
+\end{equation}
+
+The experiments which generated the pngs in gallary exp kepler where set in the following starting configurations (initial conditions).
+\tbf{Configuration 1}
+
+\begin{python}
+p1,p2,q1,q2 = [0.4,0.0] , [-0.4,0.0] , [0,-1] , [0,1]
+y = [p1,p2,q1,q2] # supervector
+m1,m2 = 1.0 , 1.4
+E = -0.563
+L = 0.800
+\end{python}
+
+The integration constants use are \pyth{STEPS} and the time-step is $h =$ \pyth{H} specified in the graphs in title of energy plots.
+
+Starting configuration, same energy and ang momentum as in configuration 1, the program puts us automatically into CM frame. We are in same starting position but not same starting momentum.
+
+\begin{python}
+p1,p2,q1,q2 = [0.3 , 0.07] , [-0.5 , 0] , [0,-1] , [0,1]
+y = [p1,p2,q1,q2] # supervector
+m1,m2 = 1.0 , 1.4
+E = -0.563
+L = 0.800
+\end{python}
+
+\tbf{Configuration 3}
+
+\begin{python}
+p1,p2,q1,q2 = [0.8 , 0.0] , [-0.8 , 0] , [0,-1] , [0,1]
+y = [p1,p2,q1,q2] # supervector
+m1,m2 = 1.0 , 1.4
+E = 
+L = 
+\end{python}
+
+\tbf{Configuration 4}
+
+\begin{python}
+p1,p2,q1,q2 = [0.4,0.1] , [-0.4,-0.1] , [0,-1] , [0,1]
+y = [p1,p2,q1,q2] # supervector
+m1,m2 = 1 , 1.4
+E = 
+L =
+\end{python}
+
+
+\subsubsection{Remarks}
+
+\tbf{Exp Euler}
+The method performed poorly in general. However when integrated with very small time steps, it did conserve the angles between invariant level sets slightly better than when combined with a projection method. There was no drift in the mean although the amplitude did increase. 
+
+When combined with a projection, the angles between invariant level sets tend to orthonormalize and the k-factor goes to zero, which means the orbit becomes circular after a long time. 
+
+\tbf{Str\"omer Verlet}
+The Str\"omer Verlet scheme on it's own perserves all six of the quantities for a long time. Of special interest is that the plots of the k-factor and the angles between invarient level sets are preserved over long time periods even with large steps, this is expected because the roughly elliptic orbits of the modified equation \eqref{eq:stromer verlet modified equation} are integrated exactly and are not pulled toward circular orbits. The same goes for the angles betweent he invarient level sets, these are preserved very well over long time periods as demonstrated the figure \pyth{invarients_config4_stromer_verlet_None_h=0.05_STEPS=100000.png}. 
+
+Upon inspection of the plots (see fig \ref{fig:numerical experiments kepler}, see also \href{https://github.com/dcxSt/numerical_integrators/tree/master/figures/gallary}{many more plots online}) we observe that in every starting configuration, no matter the integrator, the projection methods invariable maximized the orthogonality of the invariant level sets (energy and angular momentum) who's intersection constitutes the invariant manifold onto which we are projecting.  
+
+
 
 \subsection{Projection Methods}
 
@@ -635,7 +746,7 @@ $$
 
 We refine the projection iteratively with respect to it's components, each of which is associated with a first integral. We start by initializing our set $\{\nabla \beta_1' ,\cdots , \nabla\beta_s'\} := \{\nabla \beta_1 ,\cdots ,\nabla \beta_s \}$, we start with $j=1$. For each $i\neq j$ we redefine the set, projecting each vector with the operator $\hat P_{j,\{\nabla\beta_1',\cdots,\nabla\beta_s'\}}$ which we write $\hat P_{j}$ for short; defined as follows
 
-\begin{equation}\label{eq:fisrt coefficient}
+\begin{equation}\label{eq:first coefficient}
     \hat P_j : \nabla\beta_i' \mapsto \nabla\beta_i' - \alpha_{ij}\nabla\beta_j' \qquad\text{with}\qquad \alpha_{ij} = \frac{\nabla\beta_j \cdot\nabla\beta_i'}{\nabla\beta_j\cdot\nabla\beta_j'} 
 \end{equation}
 
@@ -1207,319 +1318,9 @@ Since the curves are closed, all solutions of \eqref{eq:Lotka-Volterra} are peri
 
 
 
-\subsection{Kepler Projection Methods Experiment.}
-\subsubsection{Aim}
-To find some numerical evidence for or against the hypothesis, to generate ideas for where to go next, to gain intuitive understanding of which numerical integrators work better for this type of problem, do error analysis. 
 
-\subsubsection{Theory / Hypothesis}
 
-The setup is the two body or Kepler problem with point masses $m_1,m_2$ the hamiltonian is the usual one with parameters $p_{11},p_{12},p_{21},p_{22},q_{11},q_{12},q_{21},q_{22}$. The total mass is denoted $M$, and the reduced mass $\mu$, the reduced velocity is an $\R^2$ vector and is denoted $v$ and the reduced distance $r$. 
 
-The Kepler problem is given by the ode
-\begin{equation}\label{eq:ode kepler}
-    \dot y = (\dot p,\dot q) = J^{-1}\nabla H(p,q)
-\end{equation}
-where $J = \left[\begin{array}{c|c}0&\unit\\\hline-\unit&0\end{array}\right]$ is the canonical symplectic form and $H$ is the Kepler hamiltonian.
-
-We can solve it analytically, see \cite{WBell} page 129. 
-
-There is a theorem which states that syplectic flow which conserve all first integrals (invariants) of a Hamiltonian system (Find the theorem and name it, state it formally and possibly prove it!) must be exact, i.e. there is a unique syplectic flow which conserves all first integrals. The projection methods' numerical flow conserves all invariants, is not exact and hence is not symplectic. 
-
-
-Our ode \eqref{eq:ode kepler} can either be viewed as an 8 dimensional beast or, when put into the inertial CM frame we can reduce the dimensions to 4, in which case it is the same ode as of a single reduced mass orbiting a central potential in the plane. We do not reduce the dimensions for the integration schemes for we wish to use similar integrators for the n-body problem. With every integration step we project onto the the $L-E$-manifold, the intersection of the energy and angular momentum first integrals. In the following numerical experiments, we are looking for evidence of an attracting sub-manifold of the $L-E$-manifold. This is the main hypothesis : the numerical flow of projection methods creates attractors.
-
-\subsubsection{Method}
-
-We use the following methods to try and gauge what is going on.
-
-The acceleration of a point mass travelling in a circle is $a_c = v^2/|r|$ (inwards), the centripetal acceleration of the reduced mass is $GM/{|r|^2}$. We define the \tbf{k-factor} as the quantity $k(p,q) = v^2 - \frac{GM}{|r|}$. Hence, when the orbit is circular this quantity goes to zero $k\to 0$. If the orbit is elliptical and highly eccentric, we should observe this quantity oscillating wildly up and down with each orbit, the $k$-factor for the exact flow, for such an orbit should be a periodic and un-damped. We use this quantity to see if an integration scheme is pulling the orbit into a circular one. 
-
-Another quantity we are interested in is the \tbf{angle} between the first-integral level surfaces $L$ and $E$ onto which we are projecting. Using the euclidean metric induced by the $(p,q)$ coordinate system we define the angle between these manifolds at a point $p$ as the arc-cosine of the absolute value of the dot product of their area-forms. Taking the absolute value gives us the acute angle. The dot product of the area forms are the same as the dot product of their Hodge-duels which are parallel to the gradients of the first integral functions. So the acute angle of surfaces $H=cnst$ and $L=cnst$ with area forms $\omega_H,\omega_L$ resp. are given by 
-
-\begin{equation}\label{eq:angle between level sets}
-    \theta_p = \arccos{|\omega_H(p) \cdot \omega_L(p)|} = \arccos|\star \omega_H(p) \cdot \star\omega_L(p)| = \arccos\left| \frac{\nabla H \cdot \nabla L }{|\nabla H| |\nabla L|} \right|_p
-\end{equation}
-
-The projection methods used are given in detail above.
-
-The 
-
-\tbf{Error analysis}. For the syplectic integrators we can do some backward error analysis, comparing the truncated modified vector field with the exact one. And second since there is an analytic solution to the Kepler problem we can just compare our results with the exact solution and obtain the global error of each method. 
-
-\subsubsection{Results, Observations, Remarks, Speculation.}
-
-
-
-For reference the k-factor is 
-
-\begin{equation}
-    v^2 - \frac{G M}{r}\qquad:\quad M = m_1+m_2
-\end{equation}
-
-The experiments which generated the pngs in gallary exp kepler where set in the following starting configurations (initial conditions).
-\tbf{Configuration 1}
-
-\begin{python}
-p1,p2,q1,q2 = [0.4,0.0] , [-0.4,0.0] , [0,-1] , [0,1]
-y = [p1,p2,q1,q2] # supervector
-m1,m2 = 1.0 , 1.4
-E = -0.563
-L = 0.800
-\end{python}
-
-The integration constants use are \pyth{STEPS} and the time-step is $h =$ \pyth{H} specified in the graphs in title of energy plots.
-
-Starting configuration, same energy and ang momentum as in configuration 1, the program puts us automatically into CM frame. We are in same starting position but not same starting momentum.
-
-\begin{python}
-p1,p2,q1,q2 = [0.3 , 0.07] , [-0.5 , 0] , [0,-1] , [0,1]
-y = [p1,p2,q1,q2] # supervector
-m1,m2 = 1.0 , 1.4
-E = -0.563
-L = 0.800
-\end{python}
-
-\tbf{Configuration 3}
-
-\begin{python}
-p1,p2,q1,q2 = [0.8 , 0.0] , [-0.8 , 0] , [0,-1] , [0,1]
-y = [p1,p2,q1,q2] # supervector
-m1,m2 = 1.0 , 1.4
-E = 
-L = 
-\end{python}
-
-\tbf{Configuration 4}
-
-\begin{python}
-p1,p2,q1,q2 = [0.4,0.1] , [-0.4,-0.1] , [0,-1] , [0,1]
-y = [p1,p2,q1,q2] # supervector
-m1,m2 = 1 , 1.4
-E = 
-L =
-\end{python}
-
-
-\subsection{Remarks}
-
-\subsubsection{Exp Euler}
-The method performed poorly in general. However when integrated with very small time steps, it did conserve the angles between invariant level sets slightly better than when combined with a projection method. There was no drift in the mean although the amplitude did increase. \\
-
-When combined with a projection, the angles between invariant level sets tend to orthonormalize and the k-factor goes to zero, which means the orbit becomes circular after a long time. 
-
-\subsubsection{Str\"omer Verlet}
-The Str\"omer Verlet scheme on it's own perserves all six of the quantities for a long time. Of special interest is that the plots of the k-factor and the angles between invarient level sets are preserved over long time periods even with large steps, this is expected because the roughly elliptic orbits of the modified equation \eqref{eq:stromer verlet modified equation} are integrated exactly and are not pulled toward circular orbits. The same goes for the angles betweent he invarient level sets, these are preserved very well over long time periods as demonstrated the figure \pyth{invarients_config4_stromer_verlet_None_h=0.05_STEPS=100000.png}. \\
-
-An important result is that obtained from the diagrams is that in every starting configuration, no matter the integrator, the projection methods invariable maximized the orthogonality of the invariant level sets (energy and angular momentum) who's intersection constitutes the invariant manifold onto which we are projecting.  
-
-
-
-
-\section{Meeting prep}
-\subsection{Meeting prep Thursday 16 July}
-\subsubsection{Review of week}
-\begin{itemize}
-    \item started section 6 (Lyapunov exponents)
-    \item finished analysis of modified equations (for now)
-\end{itemize}
-\subsubsection{Questions}
-Some questions about conservation of volume and stuff to do with that, symplectic form, Lyapunov exponents and Liouville's theorem... Some questions about chaotic systems...
-\subsubsection{Plan for next week}
-\begin{itemize}
-    \item Numerical stuff
-    \begin{enumerate}
-        \item implement the modified equations for the explicit Euler and St\"ormer Verlet modified numerical flows with small time-steps to see if these are faithful to the numerical flows of the equations with large time-steps Kepler problem (~5h), n body (+3h)
-        \item implement the modified equations with the projection O($h^2$) term, test this one against the projection method equations [rem you have to compute the hessian of the ang momenta too] (+3h)
-        \item implement modified equations with exaggerated projection term so that the effect is even more perturbed
-        \item implement lyapunov exponent finder (chapter 3 of Arkdey et al., best if you're comfortable with the theory from chapter 2 first though... so this will probably take some time to get to). Goal is to have this done by next week.
-    \end{enumerate}
-    \item Theoretical stuff
-    \begin{enumerate}
-        \item understand chaos better, attractors, lyapunov exponents, lyapunov exponents for ergotic and symplectic systems and lyapunov exponents with regards to attractors. 
-    \end{enumerate}
-\end{itemize}
-
-\subsection{Meeting prep Thursday 18 June}
-\subsubsection{Review of week}
-\begin{itemize}
-    \item Dumped the old 'difference flow' idea I had been working with, it's not easy to analyse...
-    \item Worked on modified equations
-    \item worked on exact solution to Kepler problem
-\end{itemize}
-
-\subsubsection{Questions}
-Trying to modify the equation i have numerical flow? \\
-
-Can't figure out why the second order term dissapears with the explicit euler flow - ask Gantumur if he can spot mistake in equation / thinking.\\
-
-Let $\phi_t$ be the time translation operator and $M$ the invariant manifold. Working in local coordinates.\\
-
-My most immediate problem, though perhaps it won't be too hard, is finding what $D\phi_t$ is for exact flows and for the numerical flows. For the exact flow we have 
-$$\phi_t(y_0) = 
-\lim_{n\to\infty} \left( \unit + \frac{t}{n}J^{-1}\nabla H \right)^n (p,q)
-$$
-
-\subsubsection{Plan for next week}
-\begin{itemize}
-    \item Implement the differential of the form, go through derivation of equivalence of hamiltonian and symplectic systems, write it out here in report and implement a method which shows us how the form is changing. The whole buiseness with 
-    $$
-    D\phi_t^T(y_0) J D\phi_t(y_0) \equiv J
-    $$
-    find a way of expressing how much the quantity changes infinitesimally, if there is an invarient manifold any two vectors $\xi,\eta \in T_y M$ will eventually be squiched into a smaller dimension...
-    \item Explore the same thing as above but with the area form $dp_1\wedge dp_2\wedge dp_3\wedge \cdots \wedge dq_d$. Basically the volume preservation thing will be approximating the derterminant of the modified flow's jacobian. I think in order to prove that 
-    
-    \item finally get round to writing out the exact solution of Kepler problem - I've been stubbornly trying to derive this myself for a few days using symmetry methods learned from symmetry methods for modified equations - it should be a textbook example of applications of lie symmetries for reduction of order, but have been struggle with this. 
-    
-    \item Reread relevant sections of \cite{Spivak} think of best way of getting the `area form' on the manifold. There are several ways you could do this, either take an orthonormal basis where the first $m$ vectors are in $T_{y_0} M$ and the other vectors are in the perp space. Find $D\phi_t$ and act on these vectors with $D\phi_t$ and then take their wedge. Remind yourself how the Alternation map works I think it's something like 
-    $$
-    Alt(v_1\otimes \cdots\otimes v_m) = v_1\wedge \cdots \wedge v_m = \frac{1}{m!}\sum_{\tau\in S_m} \text{sign}(\tau) (v_{\tau(1)} \otimes\cdots\otimes v_{\tau(m)})
-    $$
-    whatever it is it's definitely in Spivac, this is for next week. The above ideas are all ideas of how to analyse the modified equations but I need to make sure that I have the right ones first, so once the issue of finding the numerical flows is fixed, find the modified equations for the projection methods up to as high order as possible. Perhaps start with $O(h^2)$ but it would be nice to go up to $O(h^4)$ if I can. Also before you start messing with the modified equations it would be nice to have some more experimental data and postulates to test out with numerical stuff. For things like preservation of the area form on invarient manifold can be done both analytically and with experiment, that means that you could do well to set up the 
-    
-    \item Things to implement and plot in kepler as well as n-body 
-    \begin{enumerate}
-        \item $\left| D\phi_t^t J D\phi_t\right|$ - although I have to first figure out what this even menas!
-        \item more concrete symplectic form instruments, much work to be done on these
-        \item area form stuff described above. 
-    \end{enumerate}
-\end{itemize}
-
-\subsubsection{Suggestion}
-evolve a bunch of near-bye points, 
-
-check out Lyapunov exponent, read...
-
-\subsection{Meeting prep Thursday 9 July}
-\subsection{Review of this week}
-
-\subsection{Questions}
-\begin{itemize}
-    \item To my understanding, the $q$ in a Lagrangian represents postition and the $p$ has to do with change in $\dot q$; whereas I think in Hamiltonian systems $p$ and $q$ are more abstract...? Is this correct?
-    \item 
-\end{itemize}
-
-\subsection{Plan}
-
-\subsection{Meeting prep Thursday 11 June}
-\subsubsection{Review of this week}
-\begin{itemize}
-    \item Numerical experiments conducted, specially for the Kepler problem.
-    \item Read articles about topology of invariant manifolds, specifically the energy manifold for the 2 and 3 body problem, this stuff is interesting but quite challenging to understand, should I invest more brain into this or is it too tanjential wrt the project?
-    \item Postualted a differential equation on $TM$ which models the difference between the numerical + projection flow and the exact flow. 
-    \item Wrote some methods for showing the accretion onto invariant manifold.
-    \item Reasons for thinking the projections induce an attractor:
-    \begin{itemize}
-        \item For the symplectic Str\"omer Verlet method, when we have configurations where this method preserves a periodic angle between energy and ang mom manifolds, projecting at every step knocks the Str\"omer Verlet method off it's syplectic path.
-        \item Only with the explicit euler method (+ projection) the k-factor goes to zero - it's only with exp euler that the orbits tend toward circular orbits.
-        \item 
-    \end{itemize}
-\end{itemize}
-
-Notes and takeaways : generally speaking the best projection method is the `parallel' one, at least for the Kepler problem, it seems to preserve the actual behaviour of orbits a little better than the other projection methods. Although all methods exhibit similar behaviour, there is no drastic difference between them observed thus far. 
-
-For some reason the explicit euler method (without projection) sometimes also tends to maximize the angles between invarient first integrals. I have see the Str\"omer Verlet method do this too for configuration 2.
-
-
-
-\subsubsection{Plan for next week}
-\begin{itemize}
-    \item Re-factor Kepler problem code and write documentation? (ask if important)
-    \item Calculate the difference flow field for energy in the (reduced) kepler problem
-    \item Calculate the difference flow field for angular momentum
-    \item Combine them and see if you can find invariant solutions. Some candidates are circular orbits!
-    \item Find analytical paths which you think are invariant under the difference flow (e.g. equal mass, same relative velocities).  
-\end{itemize}
-
-\subsubsection{Questions}
-\begin{itemize}
-    \item Is the topology of the energy manifold of the modified/truncated equation the same as the exact equation and does this have any baring on the solution? My guess is that for the n body problem it will change something. Should I read more about this?
-    \item what is a weakly attracting manifold
-\end{itemize}
-
-
-
-\subsubsection{Review of this week (this was for the last Thursday of May)}
-\begin{itemize}
-    \item comparison plots for energy of Kepler problem - talk about the code
-    \item show them the cuts - this was kind-of a curiosity, I'm not sure how useful it's going to be; originally I wanted this to be about the 
-\end{itemize}
-
-\subsubsection{Plan for next week / ask what to do + suggest ideas / what I am currently puzzled by}
-\tbf{THEORY}
-\begin{enumerate}
-    \item It is still not clear in my mind how angular momentum works for many body systems, for a central potential (with one particle) conservation of total angular momentum and of angular momentum along each axis can be derived from the fact that the system admits the group $U(d)$ (a lie group of dimension $d^2$) [is it correct to say that the generators of this group commute with the generator of time translations? - I tried to answer this myself mathematically]
-    \item Understand the Legendre transform and the link between Hamiltonian and Lagrangian mechanics
-    \item Understand better the symmetries of many body problems 
-    \item really understand fully the equivalence of the condition of syplecticity and being a hamiltonian system
-    \item derive a more general and broad version of Noether's theorem that uses hamiltonian formalism and tricks from the book, rather than lagrangian formalism and the argument I had above. 
-\end{enumerate}
-\tbf{EXPERIMENT}
-\begin{enumerate}
-    \item fix the projection method, get it to work properly, ask for guidance from Gantumur - unfortunately I did not get to test the multi-projection method properly before the meeting because it turns out my projections onto the angular momentum manifold were no good to start with...
-    \item implement many body problem? (particles / solar-system)
-    \item 
-\end{enumerate}
-
-read up on statistical methods for evaluating chaotic systems (good integration methods)
-
-
-\subsection{Meeting prep Thursday 14 May}
-\subsubsection{Questions}
-\begin{enumerate}
-    \item Q: for Gantumur: a conservation law is just a first integral of a hamiltonian, are there hamiltonian systems where the level sets of the first integrals are more than just the momentum and energy manifolds? - are there more symmetries?
-
-    \item Q: I'm trying to figure out how we can identify symmetries in the hamiltonian, given this hamiltonian ode
-    $$\dot y = J^{-1}\nabla H\qquad J = \begin{pmatrix}0&I\\-I&0\end{pmatrix}$$
-    is the following statement correct?
-    $$
-    [X , J^{-1}\nabla H] = 0 \RA [\Gamma_\epsilon , J^{-1}\nabla H] = 0 \RA \text{does the symmetry preserve $\L$ ?}
-    $$
-    Am I correct in thinking that Noether's theorem implies that for each one parameter lie group $\Gamma_\epsilon$ acting on the solution set $S$, there exists a first integral $\phi_\Gamma$; and that the orbits of $\Gamma_\epsilon$ cross the level sets of $\phi_\Gamma$ transversly
-    
-    \item Q: Theorem 2.6 page 185 of \cite{Numerical} asserts that a system is symplectic iff locally hamiltonian and vice versa, does this mean that all of the symmetries of the Hamiltonian are preserved by symplectic maps?
-    
-    \item Q: Page 191 in \cite{Numerical}, there is something that looks like Category theory. (this is okay actually I just have to read it more and better)
-    
-    \item Q: I think J.P. Lessard is working on placing analytical error boundary on numerically computed solutions to odes, is there a way of doing this with symplectic integrators? (I think the ones we saw in Lessard's class (325 odes) were using picard iterations + contraction mapping theorem)
-    
-    \item Q: I don't really understand Noah and Selim's projects', I'd quite like to be able to participate in the discussions, is there something someone can send me that I might be able to have more theoretical understanding of how this works. 
-    
-    \item Q: in chapter 8 of \cite{Symmetry-methods} there is a section on `Finding Symmetries by Computer Algebra', in your opinion is this something that is worth looking into eventually
-
-
-\end{enumerate}
-
-\subsubsection{Review of this week}
-\begin{itemize}
-    \item read Hydon's book, did the exo's in ch 2 and 3 ; Assesment :  struggled more than I thought I would with these, need to do more intense sessions, specially for solving the questions at the end of the chapters; the groundwork is done, I am familiar with the concepts, terminology and basic examples, now it's time to start looking at some more elaborate ones and solve them
-    \item theoretical understanding of simplecticity (+ Hamiltonian systems) gained + symmetric methods
-    \item disappointed that I didn't get the numerical experiments under-way, will make greater efforst next week to start with those, perhaps solar system equations are a good place to start
-\end{itemize}
-
-\subsubsection{Plan for next week + future}
-\tbf{Symmetry methods for differential equations}
-\begin{enumerate}
-    \item really understand Noether's theorem, find a more generalized statement of it (+ it's 3 varients)
-    \item read thoroughly chapters 4, 5 and 6, do all (if not half) of the excersises up till beg of ch 7. 
-    \item play with the equations from these books numerically with computer? (generate vector fields for some of the examples + vector fields of symmetries)
-\end{enumerate}
-\tbf{Numerical methods}
-\begin{itemize}
-    \item Experiment
-    \begin{enumerate}
-        \item implement euler method for solar system
-        \item implement runge kutta symmetric (Str\"omer-Verlet) method for solar system
-        \item implement runge kutta symplectic method for solar system
-        \item conduct backward error analysis
-        \item test projection methods for all (onto H and L)
-    \end{enumerate}
-    \item Theory
-    \begin{enumerate}
-        \item Chapter III? - Ask Gantumur if this is worth reading. 
-        \item reading of IV and V
-        \item chapter VI in depth
-    \end{enumerate}
-\end{itemize}
 
 
 \section{Conclusions}
@@ -1533,18 +1334,20 @@ What did I learn about symplectic geometry (as an old field, as a theory that co
 What did you read about that was out of your depths (renormalization of manifolds, ...)?
 
 \subsection{Critical analysis of learning and process}
-One of the aims of this project was for me to learn more about the field, and learn how to conduct research independently. Although I learned a lot during this project there is still much left to be desired. I can't make up my mind whether the problem stems from dis-organization, or some deeper lack of connection with the subject matter which prevents flow; or perhaps it is just a normal part of the learning process to struggle and feel somewhat inadequate at times.
+One of the aims of this project was to learn how to do research independently. I can't make up my mind whether the problem stems from disorganization, or some deeper lack of connection with the subject matter which prevents flow; or perhaps it is just a normal part of the learning process to struggle and feel somewhat inadequate at times.
 
-One criticism is that I need to read a whole lot more and get better at familiarizing myself with literature on some subject before starting my own research; in order to cultivate a more thorough and holistic view of what it is I am working on I need to read more broadly and thoroughly, but this I can't force myself to do, it's best if it comes naturally. 
+I read a lot of random articles that were only vaguely relevant to what I was working on, many things I read I also didn't understand. Don't know if this is a good or bad thing.
 
-I spent much time reading a lot of random articles that didn't bear much relevance to what I was doing, many things I read I also didn't understand. Don't know if this is a good or bad thing... 
+There where periods when I felt inspired and spent hours reading or coding at a time, and there were periods when I felt uninspired and either did something else or forced myself to do research despite myself. I'm struggling to find a good balance between straining myself and doing too little work; when you feel lethargic is it the case that you should force yourself to work until you are more inspired or should will that just demotivate you? And when you *are* motiviated should you keep working until you don't? - this strikes me as counter-productive because ideally you want to finnish well with a good idea of what you want to do next, rather than keep going until you trail off. The question of finding inspiration and flow has been plaguing me for a while but I don't seem to have made much headway answering it - am I asking the wrong question?
 
-Didn't push myself as hard as I think I should have, however I don't think research is about just pushing yourself till you go crazy, I think it's about; I think if you find something you love you don't need to push yourself. Made me question what it is I want to do. 
+*different take on same theme as above paragraph:* 
+I'm disappointed that I didn't end up getting completely absolved by the project, I think my approach to learning is definitely improving (becomming more effective) and there where times when all I could think about was the project and what I was currently doing, but this feeling didn't permeate everything. What I mean to say is that the project was enjoyable but not something I would loose sleep over, or wake up in the middle of the night with a revelation about, as was the case in high-school sometimes I lay awake for hours thinking about math, and on a few occasions it woke me up up at 3am and I would just start writing math for the next couple hours; this level of inspiration is something I'm trying to master and tame so as to be able to make more of it and get it on demand, I haven't got there yet - my aim is to try achieve this before end of undergrad. 
 
-I'm a bit disappointed that I didn't end up getting completely absolved by the project, I think my approach to learning is definitely improving and there where times when all I could think about was the project and what I was currently doing, but this feeling didn't permeate everything. What I mean to say is that the project was enjoyable but not something I would loose sleep over, or wake up in the middle of the night with a revelation about, I remember this being the case in high-school, sometimes I lay awake for hours thinking about math, and on a few occasions I would wake up at 3am and just start writing math for the next two hours; this level of inspiration is something I'm trying to achieve and I haven't got there yet, and I want to try to get there before I leave university because it'll be hard to focus on that with a job, and with any luck if I find that in university then I'll be able to make a career out of something I'm passionate about. 
+**Future work.**
+It seems I opened some doors which lead down various avenues of exploration: I want to learn more about Lie groups \& algebras (this is what I'm currently reading about), hamiltonian systems, the poisson braket, numerical schemes ++; then I also want to capitalize on my code to make more simulations of realistic n-body problems such as earth / sun / moon system, or a real solar system, or satalites and display the Lyapunov of different integrators for these types of problem with different integrators. I also want to read more articles about integration methods to know more about the context into which my project fits so that I can write something reasonable if I make an article for arxiv or to send to journals.
 
 \subsection{Skills acquired}
-Got better at reading literature. More coding is never a bad thing, I actually had quite a bit of fun coding, maybe next summer I'll try making a startup instead.
+Got better at reading literature. More coding is never a bad thing, I actually had quite a bit of fun coding.
 
 
 \subsection{Future work}
@@ -1611,7 +1414,7 @@ Goal for week : implement the runga-kunga methods from \cite{Duruisseaux} and se
 
 \section{Appendix C}\label{appendix c}
 \subsection{Random Attractors}
-Here are twelve of my favourite random attractors I generated using code form \href{http://paulbourke.net/fractals/lyapunov/}{Paul Bourke's website}, thank you Paul Bourke. The way the algorithm works is it randomly generates a 5th order (non linear) ODE in two variables, then solves for the trajectories of several randomly generated points. Most of the time the orbits tend to infinity, sometimes there is an integer dimensional (Hausdorff dimension) attractor, but sometimes these equations give rise to a strange attractors as seen below. 
+Here are twelve of my favourite random attractors generated using code form \href{http://paulbourke.net/fractals/lyapunov/}{Paul Bourke's website}, thank you Paul Bourke. The way the algorithm works is it randomly generates a 5th order (non linear) ODE in two variables, then solves for the trajectories of several randomly generated points. Most of the time the orbits tend to infinity, sometimes there is an integer dimensional (Hausdorff dimension) attractor, but sometimes these equations give rise to a strange attractors (\ref{fig:random chaotic attractors} , \ref{fig:random chaotic attractors2}). 
 
 \newpage
 \begin{figure}[H]
@@ -1645,8 +1448,17 @@ Here are twelve of my favourite random attractors I generated using code form \h
 \newpage
 
 \subsection{Henon-Heiles Attractor}
-The cuts are generated by [Explination from the book \cite{Numerical}] asdfasdfasdf asdfasdfa sdfasdf asdfasdfasdf asdfasdfasdfasdfasdf asdfasdf asdfasdf asdfasdfasdf asdfasdfa sdfasdf asdfasdfasdf asdfasdfasdfasdfasdf asdfasdf asdfasdf asdfasdfasdf asdfasdfa sdfasdf asdfasdfasdf asdfasdfasdfasdfasdf asdfasdf asdfasdf asdfasdfasdf asdfasdfa sdfasdf asdfasdfasdf asdfasdfa sdfasdf asdfasdfasdf asdfasdfasdfasdfasdf asdfasdf asdfasdf asdfasdfasdf asdfasdfa sdfasdf asdfasdfasdf asdfasdfasdfasdfasdf asdfasdf asdfasdf
+``The H\'enon-Heiles model was created for describing stellar motion, followed for a very long time, inside the gravitational potential $U_0(r,z)$ of a galaxy with cylindrical symmetry (H\'enon \& Heiles 1964). Extensive numerical experimentations should help to answer the question, if there exists, besides the known invariants $H$ and $L$, a \textit{third} invariant. Despite endless tentatives of analytical calculations during many decades, such a formula had not been found.
 
+After a reduction of dimension, a Hamiltonian in two degrees of freedom of the form
+\begin{equation}\label{eq:heinon heiles hamiltonian}H(p,q) = \frac{1}{2} \left( p_1^2 + p_2^2 \right) + U(q)
+\end{equation}
+
+is obtained and the question is, if such an equation has a \textit{second} invariant. Here H\'enon and Heiles put aside the astronomical origin of the problem and choose
+$$U(q) = \frac{1}{2}\left( q_1^2 + q_2^2 \right) + q_1^2q_2 - \frac{1}{3}q_2^3$$
+When $U$ approaches $\frac{1}{6}$, the level curves of $U$ tend to an equilateral triangle, whose verties are saddle points of $U$. The corresponding system has solutions with nontrivial properties. For given initial values with $H(p_0,q_0)<\frac{1}{6}$ and $q_0$ inside the triangle $U \leq \frac{1}{6}$, the solution stays there and moves somehow like a mass point gliding on this surface (see figure \ref{fig:hennon-heiles pointcare cuts}).
+
+\textbf{Poincar\'e Cuts.} We fix the energy $H_0$ and put $q_{10} = 0$. Then for any point $P_0 = (q_{20} , p_{20})$, we obtain $p_{10}$ from \eqref{eq:heinon heiles hamiltonian} as $p_{10} = \sqrt{2H_0 - 2U_0 - p_{20}^2}$, where we choose the positive root. We then follow the solution until it hits again the surface $q_1 = 0$ in the positive direction $p_1 > 0$ and obtain a point $P_1 = (q_{21},p_{21})$; in the same way we compute $P_2 = (q_{22},p_{22})$, etc. For the same initial values and with $H_0 \in [\frac{1}{12} , \frac{1}{6}]$, the solution gives the Pointcar\'e cuts below (fig \ref{fig:hennon-heiles pointcare cuts})" \cite{Numerical}
 
 \begin{figure}[H]
     \centering
