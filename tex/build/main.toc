@@ -44,34 +44,30 @@
 \contentsline {section}{\numberline {5}Chaos, the Lyapunov spectrum and do the projection methods give rise to an attractor?}{29}{section.5}
 \contentsline {subsection}{\numberline {5.1}Lyapunov Exponents}{29}{subsection.5.1}
 \contentsline {subsubsection}{\numberline {5.1.1}Gramm Schmidt decomposition : Algorithm for finding Lyapunov exponents 1}{30}{subsubsection.5.1.1}
-\contentsline {subsubsection}{\numberline {5.1.2}Housolder Reflections : Algorithm for finding Lyapunov exponnents 2}{30}{subsubsection.5.1.2}
 \contentsline {subsection}{\numberline {5.2}Calculating Lyapunov exponents for symplectic integrators.}{30}{subsection.5.2}
 \contentsline {subsection}{\numberline {5.3}Implementation of modified equations for the Kepler problem.}{30}{subsection.5.3}
 \contentsline {subsubsection}{\numberline {5.3.1}Implementing the modified equation integrator for the Explicit Euler method (no projection)}{30}{subsubsection.5.3.1}
 \contentsline {subsubsection}{\numberline {5.3.2}Implementing the modified equation integrator for the Str\"omer Verlet method}{30}{subsubsection.5.3.2}
-\contentsline {subsubsection}{\numberline {5.3.3}Implementing the modified equation for Explicit Euler integrator with projection}{30}{subsubsection.5.3.3}
-\contentsline {subsubsection}{\numberline {5.3.4}Implementing the modified equation for Str\"omer Verlet integrator with projection}{30}{subsubsection.5.3.4}
-\contentsline {subsubsection}{\numberline {5.3.5}Implementing exaggerated modified equations}{30}{subsubsection.5.3.5}
-\contentsline {section}{\numberline {6}Experiments}{31}{section.6}
-\contentsline {section}{\numberline {7}Conclusions}{31}{section.7}
-\contentsline {subsection}{\numberline {7.1}Mathematical Conclusions}{31}{subsection.7.1}
-\contentsline {subsection}{\numberline {7.2}Critical analysis of learning and process}{31}{subsection.7.2}
-\contentsline {subsection}{\numberline {7.3}Skills acquired}{32}{subsection.7.3}
-\contentsline {subsection}{\numberline {7.4}Future work}{32}{subsection.7.4}
-\contentsline {section}{\numberline {8}Articles to refrence that I have not added to bibtex yet}{32}{section.8}
-\contentsline {section}{\numberline {A}Peter E. Hydon, Symmetry Methods for Differential Equations - A Beginner's Guide}{34}{appendix.A}
-\contentsline {section}{\numberline {B}Geometric Numerical Integrations - Structure Preserving Algorithms for Ordinary Differential Equations.}{34}{appendix.B}
-\contentsline {section}{\numberline {C}Papers}{34}{appendix.C}
-\contentsline {section}{\numberline {D}Appendix B - Log}{34}{appendix.D}
-\contentsline {subsection}{\numberline {D.1}Friday 8 May 2020}{34}{subsection.D.1}
-\contentsline {subsubsection}{\numberline {D.1.1}Goals}{34}{subsubsection.D.1.1}
-\contentsline {subsubsection}{\numberline {D.1.2}Log}{34}{subsubsection.D.1.2}
-\contentsline {subsection}{\numberline {D.2}Weekly Goals - week of 2020.05.11}{34}{subsection.D.2}
-\contentsline {subsection}{\numberline {D.3}Monday 11 May 2020}{34}{subsection.D.3}
-\contentsline {subsection}{\numberline {D.4}Thursday 11 May 2020}{34}{subsection.D.4}
-\contentsline {subsection}{\numberline {D.5}Weekly Review - week of 2020.05.11}{35}{subsection.D.5}
-\contentsline {subsection}{\numberline {D.6}Weekly Goals - week of 2020.05.18}{35}{subsection.D.6}
-\contentsline {section}{\numberline {E}Appendix C}{35}{appendix.E}
-\contentsline {subsection}{\numberline {E.1}Random Attractors}{35}{subsection.E.1}
-\contentsline {subsection}{\numberline {E.2}Henon-Heiles Attractor}{38}{subsection.E.2}
-\contentsline {subsection}{\numberline {E.3}Other Stuff}{39}{subsection.E.3}
+\contentsline {subsubsection}{\numberline {5.3.3}Implementing exaggerated modified equations}{30}{subsubsection.5.3.3}
+\contentsline {section}{\numberline {6}Conclusions}{30}{section.6}
+\contentsline {subsection}{\numberline {6.1}Mathematical Conclusions}{30}{subsection.6.1}
+\contentsline {subsection}{\numberline {6.2}Critical analysis of learning and process}{31}{subsection.6.2}
+\contentsline {subsection}{\numberline {6.3}Skills acquired}{32}{subsection.6.3}
+\contentsline {subsection}{\numberline {6.4}Future work}{32}{subsection.6.4}
+\contentsline {section}{\numberline {7}Articles to refrence that I have not added to bibtex yet}{32}{section.7}
+\contentsline {section}{\numberline {A}Peter E. Hydon, Symmetry Methods for Differential Equations - A Beginner's Guide}{33}{appendix.A}
+\contentsline {section}{\numberline {B}Geometric Numerical Integrations - Structure Preserving Algorithms for Ordinary Differential Equations.}{33}{appendix.B}
+\contentsline {section}{\numberline {C}Papers}{33}{appendix.C}
+\contentsline {section}{\numberline {D}Appendix B - Log}{33}{appendix.D}
+\contentsline {subsection}{\numberline {D.1}Friday 8 May 2020}{33}{subsection.D.1}
+\contentsline {subsubsection}{\numberline {D.1.1}Goals}{33}{subsubsection.D.1.1}
+\contentsline {subsubsection}{\numberline {D.1.2}Log}{33}{subsubsection.D.1.2}
+\contentsline {subsection}{\numberline {D.2}Weekly Goals - week of 2020.05.11}{33}{subsection.D.2}
+\contentsline {subsection}{\numberline {D.3}Monday 11 May 2020}{33}{subsection.D.3}
+\contentsline {subsection}{\numberline {D.4}Thursday 11 May 2020}{33}{subsection.D.4}
+\contentsline {subsection}{\numberline {D.5}Weekly Review - week of 2020.05.11}{34}{subsection.D.5}
+\contentsline {subsection}{\numberline {D.6}Weekly Goals - week of 2020.05.18}{34}{subsection.D.6}
+\contentsline {section}{\numberline {E}Appendix C}{34}{appendix.E}
+\contentsline {subsection}{\numberline {E.1}Random Attractors}{34}{subsection.E.1}
+\contentsline {subsection}{\numberline {E.2}Henon-Heiles Attractor}{37}{subsection.E.2}
+\contentsline {subsection}{\numberline {E.3}Other Stuff}{38}{subsection.E.3}

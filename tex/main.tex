@@ -203,7 +203,7 @@ hence applying \eqref{eq:noether's theorem 1 derivation} we find that the moment
     \lag = T - U = \frac{\dot q^2}{2\mu} - U(|q|)
 \end{equation}
 
-we show that the angular momentum operator $L^2 = \left(\vec r\times \vec p\right)^2$ is a symmetry of the Lagrangian. Using the identity (I derived it from an equation in Townsend \cite{Townsend}) $\vec r\times\vec p = \vec r^2\vec p^2 - (\vec r\cdot \vec p)^2$ we derive conservation of momentum, \tbf{[see also if you can find how conservation of momentum in the z direction works, try the generator $-y\partial_x + x\partial_y$ ... ]}
+we show that the angular momentum operator $L^2 = \left(\vec{r} \times \vec{p}\right)^2$ is a symmetry of the Lagrangian. Using the identity (I derived it from an equation in Townsend \cite{Townsend}) $\vec r\times\vec p = \vec r^2\vec p^2 - (\vec r\cdot \vec p)^2$ we derive conservation of momentum, \tbf{[see also if you can find how conservation of momentum in the z direction works, try the generator $-y\partial_x + x\partial_y$ ... ]}
 
 \section{Celestial mechanics, the N-Body problem.}
 
@@ -1249,7 +1249,9 @@ The \textbf{basin of attraction} of an attractor DEFINE BASIN OF ATTRACTOR (PROB
 
 
 \subsection{Lyapunov Exponents}
-DEFINITON OF LYAPUNOV EXPONENTS 
+In this section we use the notation of \cite{PikovskyPoliti}.
+
+\tbf{Def.} 
 
 THEOREM, IN HAMILTONIAN SYSTEMS, THE LYAPUNOV EXPONENTS ARE THE SAME EVERYWHERE
 
@@ -1258,7 +1260,6 @@ THEOREM, IN HAMILTONIAN SYSTEMS, THE LYAPUNOV EXPONENTS ARE THE SAME EVERYWHERE
 
 IMPLEMENT SPECTRUM FINDER OF LYAPUNOV EXPONENTS, FIND THE SPECTRUM FOR SOME SYMPLECTIC METHOD, THE BIGGEST ONE SHOULD BE POSITIVE AND THEIR SUM SHOULD ADD TO ZERO.
 
-\subsubsection{Housolder Reflections : Algorithm for finding Lyapunov exponnents 2}
 
 \subsection{Calculating Lyapunov exponents for symplectic integrators.}
 We expect the Lyapunov spectrum to be independent of initial conditions. 
@@ -1281,46 +1282,12 @@ we integrate with 100* smaller step-sizes.
 \subsubsection{Implementing the modified equation integrator for the Str\"omer Verlet method}
 We implement the `Projected Str\"omer Verlet' modified equation with $h=0.1$ and integrate it using the explicit Euler method but with a much smaller step-size. For ease of reference the `Projected Str\"omer Verlet' method is written below \eqref{write this equation below}.
 
-\subsubsection{Implementing the modified equation for Explicit Euler integrator with projection}
+%\subsubsection{Implementing the modified equation for Explicit Euler integrator with projection}
 
-\subsubsection{Implementing the modified equation for Str\"omer Verlet integrator with projection}
-
-
+%\subsubsection{Implementing the modified equation for Str\"omer Verlet integrator with projection}
 
 \subsubsection{Implementing exaggerated modified equations}
-We then multiply the $O(h^2)$ projection terms by a constant to make them more pronounced, to see if this would give me an attractor. 
-
-
-
-
-
-\section{Experiments}
-We replicate the opening example from \cite{Numerical} - the Lotka-Volterra model. The equation is 
-\begin{equation}\label{eq:Lotka-Volterra}
-    \begin{split}
-        \dot u = u(v-2)\\
-        \dot v = v(1-u)
-    \end{split}
-\end{equation}
-
-The level curves of $I(u,v) = \ln u - u + 2\ln v - v$ are invariant since 
-$$
-\frac{dI}{dt} = \frac{1-u}{u}\dot u - \frac{v-2}{v}\dot v \stackrel{\eqref{eq:Lotka-Volterra}}{=} 0
-$$
-Since the curves are closed, all solutions of \eqref{eq:Lotka-Volterra} are periodic, we use this fact get a sense of how our various numerical integration schemes are doing. 
-
-\begin{figure}[h!]
-    \centering
-    \includegraphics[width=0.3\linewidth]{Figures/explicit_euler_metod_lotka_voltera.png}
-    \caption{Explicit Euler Method, Lotka-Voltera equation}
-    \label{fig:Explicit Euler Lotka-Voltera}
-\end{figure}
-
-
-
-
-
-
+We then multiply the $O(h^2)$ projection terms by a constant to make them more pronounced, to see if this would give me an attractor. (this ended up being very messy and didn't give me results I'd hoped it would)
 
 
 \section{Conclusions}

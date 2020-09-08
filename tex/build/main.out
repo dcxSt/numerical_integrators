@@ -44,34 +44,30 @@
 \BOOKMARK [1][-]{section.5}{Chaos, the Lyapunov spectrum and do the projection methods give rise to an attractor?}{}% 44
 \BOOKMARK [2][-]{subsection.5.1}{Lyapunov Exponents}{section.5}% 45
 \BOOKMARK [3][-]{subsubsection.5.1.1}{Gramm Schmidt decomposition : Algorithm for finding Lyapunov exponents 1}{subsection.5.1}% 46
-\BOOKMARK [3][-]{subsubsection.5.1.2}{Housolder Reflections : Algorithm for finding Lyapunov exponnents 2}{subsection.5.1}% 47
-\BOOKMARK [2][-]{subsection.5.2}{Calculating Lyapunov exponents for symplectic integrators.}{section.5}% 48
-\BOOKMARK [2][-]{subsection.5.3}{Implementation of modified equations for the Kepler problem.}{section.5}% 49
-\BOOKMARK [3][-]{subsubsection.5.3.1}{Implementing the modified equation integrator for the Explicit Euler method \(no projection\)}{subsection.5.3}% 50
-\BOOKMARK [3][-]{subsubsection.5.3.2}{Implementing the modified equation integrator for the Str\366mer Verlet method}{subsection.5.3}% 51
-\BOOKMARK [3][-]{subsubsection.5.3.3}{Implementing the modified equation for Explicit Euler integrator with projection}{subsection.5.3}% 52
-\BOOKMARK [3][-]{subsubsection.5.3.4}{Implementing the modified equation for Str\366mer Verlet integrator with projection}{subsection.5.3}% 53
-\BOOKMARK [3][-]{subsubsection.5.3.5}{Implementing exaggerated modified equations}{subsection.5.3}% 54
-\BOOKMARK [1][-]{section.6}{Experiments}{}% 55
-\BOOKMARK [1][-]{section.7}{Conclusions}{}% 56
-\BOOKMARK [2][-]{subsection.7.1}{Mathematical Conclusions}{section.7}% 57
-\BOOKMARK [2][-]{subsection.7.2}{Critical analysis of learning and process}{section.7}% 58
-\BOOKMARK [2][-]{subsection.7.3}{Skills acquired}{section.7}% 59
-\BOOKMARK [2][-]{subsection.7.4}{Future work}{section.7}% 60
-\BOOKMARK [1][-]{section.8}{Articles to refrence that I have not added to bibtex yet}{}% 61
-\BOOKMARK [1][-]{appendix.A}{Peter E. Hydon, Symmetry Methods for Differential Equations - A Beginner's Guide}{}% 62
-\BOOKMARK [1][-]{appendix.B}{Geometric Numerical Integrations - Structure Preserving Algorithms for Ordinary Differential Equations.}{}% 63
-\BOOKMARK [1][-]{appendix.C}{Papers}{}% 64
-\BOOKMARK [1][-]{appendix.D}{Appendix B - Log}{}% 65
-\BOOKMARK [2][-]{subsection.D.1}{Friday 8 May 2020}{appendix.D}% 66
-\BOOKMARK [3][-]{subsubsection.D.1.1}{Goals}{subsection.D.1}% 67
-\BOOKMARK [3][-]{subsubsection.D.1.2}{Log}{subsection.D.1}% 68
-\BOOKMARK [2][-]{subsection.D.2}{Weekly Goals - week of 2020.05.11}{appendix.D}% 69
-\BOOKMARK [2][-]{subsection.D.3}{Monday 11 May 2020}{appendix.D}% 70
-\BOOKMARK [2][-]{subsection.D.4}{Thursday 11 May 2020}{appendix.D}% 71
-\BOOKMARK [2][-]{subsection.D.5}{Weekly Review - week of 2020.05.11}{appendix.D}% 72
-\BOOKMARK [2][-]{subsection.D.6}{Weekly Goals - week of 2020.05.18}{appendix.D}% 73
-\BOOKMARK [1][-]{appendix.E}{Appendix C}{}% 74
-\BOOKMARK [2][-]{subsection.E.1}{Random Attractors}{appendix.E}% 75
-\BOOKMARK [2][-]{subsection.E.2}{Henon-Heiles Attractor}{appendix.E}% 76
-\BOOKMARK [2][-]{subsection.E.3}{Other Stuff}{appendix.E}% 77
+\BOOKMARK [2][-]{subsection.5.2}{Calculating Lyapunov exponents for symplectic integrators.}{section.5}% 47
+\BOOKMARK [2][-]{subsection.5.3}{Implementation of modified equations for the Kepler problem.}{section.5}% 48
+\BOOKMARK [3][-]{subsubsection.5.3.1}{Implementing the modified equation integrator for the Explicit Euler method \(no projection\)}{subsection.5.3}% 49
+\BOOKMARK [3][-]{subsubsection.5.3.2}{Implementing the modified equation integrator for the Str\366mer Verlet method}{subsection.5.3}% 50
+\BOOKMARK [3][-]{subsubsection.5.3.3}{Implementing exaggerated modified equations}{subsection.5.3}% 51
+\BOOKMARK [1][-]{section.6}{Conclusions}{}% 52
+\BOOKMARK [2][-]{subsection.6.1}{Mathematical Conclusions}{section.6}% 53
+\BOOKMARK [2][-]{subsection.6.2}{Critical analysis of learning and process}{section.6}% 54
+\BOOKMARK [2][-]{subsection.6.3}{Skills acquired}{section.6}% 55
+\BOOKMARK [2][-]{subsection.6.4}{Future work}{section.6}% 56
+\BOOKMARK [1][-]{section.7}{Articles to refrence that I have not added to bibtex yet}{}% 57
+\BOOKMARK [1][-]{appendix.A}{Peter E. Hydon, Symmetry Methods for Differential Equations - A Beginner's Guide}{}% 58
+\BOOKMARK [1][-]{appendix.B}{Geometric Numerical Integrations - Structure Preserving Algorithms for Ordinary Differential Equations.}{}% 59
+\BOOKMARK [1][-]{appendix.C}{Papers}{}% 60
+\BOOKMARK [1][-]{appendix.D}{Appendix B - Log}{}% 61
+\BOOKMARK [2][-]{subsection.D.1}{Friday 8 May 2020}{appendix.D}% 62
+\BOOKMARK [3][-]{subsubsection.D.1.1}{Goals}{subsection.D.1}% 63
+\BOOKMARK [3][-]{subsubsection.D.1.2}{Log}{subsection.D.1}% 64
+\BOOKMARK [2][-]{subsection.D.2}{Weekly Goals - week of 2020.05.11}{appendix.D}% 65
+\BOOKMARK [2][-]{subsection.D.3}{Monday 11 May 2020}{appendix.D}% 66
+\BOOKMARK [2][-]{subsection.D.4}{Thursday 11 May 2020}{appendix.D}% 67
+\BOOKMARK [2][-]{subsection.D.5}{Weekly Review - week of 2020.05.11}{appendix.D}% 68
+\BOOKMARK [2][-]{subsection.D.6}{Weekly Goals - week of 2020.05.18}{appendix.D}% 69
+\BOOKMARK [1][-]{appendix.E}{Appendix C}{}% 70
+\BOOKMARK [2][-]{subsection.E.1}{Random Attractors}{appendix.E}% 71
+\BOOKMARK [2][-]{subsection.E.2}{Henon-Heiles Attractor}{appendix.E}% 72
+\BOOKMARK [2][-]{subsection.E.3}{Other Stuff}{appendix.E}% 73
